@@ -19,10 +19,10 @@
 // THE SOFTWARE.
 
 #include<stdio.h>
-#include<stdlib.h>
 #include<assert.h>
 #include<math.h>
 #include"util.h"
+#include"lpk.h"
 
 int affine(double       **  W,        /*  D+1 x  D          | Linear map            */
            double       **  T,        /*  M   x  D          | Moved points          */
@@ -31,15 +31,15 @@ int affine(double       **  W,        /*  D+1 x  D          | Linear map        
            const double **  X,        /*  N   x  D          | Point set 1 (Data)    */
            const double **  Y,        /*  M   x  D          | Point set 2 (Data)    */
            const int        size[3],  /*  M, N, D           |                       */
-           const double     omg       /*  omg               |                       */
+           const double     prms[2]   /*  nloop, omg        |                       */
           ){
-  int i,m,n,d,M,N,D,lp; int nloop,info; char uplo='U';
-  double reg=1e-9;
+  int i,m,n,d,M,N,D,lp,info; char uplo='U';
+  int nloop=(int)prms[0]; double omg=prms[1],reg=1e-9;
   double sgm2=0,noise,pres1=1e10,pres2=1e20,pren,conv;
   double mX[3],mY[3],A[9],B[9],a[3];
   double **F,*b,**PXc,**Xc,**Yc,**C1;
 
-  M=size[0];N=size[1];D=size[2];nloop=2000; assert(D<=3);
+  M=size[0];N=size[1];D=size[2]; assert(D<=3);
   F=W;b=W[3];PXc=C[0];Xc=C[1];Yc=C[2];C1=C[3];
 
   /* initialize */
@@ -88,46 +88,6 @@ int affine(double       **  W,        /*  D+1 x  D          | Linear map        
     if(fabs(conv)<1e-8)break;
 
   } NUM=lp==nloop?lp:lp+1;
-
-  return 0;
-}
-
-
-int main(int argc, char **argv){
-  int M,N,D,nlp=2000,size[4];double omg=0.1;
-  double **W,**T,**P,***C,**X,**Y;
-
-  if(argc==1){printf("./cpd <X> <Y>\n");exit(1);}
-
-  X=readPoints(&N,&D,argv[1]);
-  Y=readPoints(&M,&D,argv[2]);
-
-  normPoints(X,N,D);
-  normPoints(Y,M,D);
-
-  size[0]=M;size[1]=N;size[2]=D;
-  MEM=malloc(3*sizeof(int)+nlp*M*D*sizeof(double));
-
-  W = calloc2d(D+1,D);
-  T = calloc2d(M,  D);
-  P = calloc2d(M+1,N+1);
-  C = calloc3d(4,N>M?N:M,D);
-
-  #define CD (const double **)
-  affine(W,T,P,C,CD X,CD Y,size,omg);
-
-  writePoints("T1.txt",CD T,M,D);
-  writePoints("X1.txt",CD X,N,D);
-  writePoints("Y1.txt",CD Y,M,D);
-  #undef  CD
-
-  if(MEM){FILE *fp=fopen("ontheway.bin","wb");
-    fwrite(&M,  sizeof(int),   1,      fp);
-    fwrite(&D,  sizeof(int),   1,      fp);
-    fwrite(&NUM,sizeof(int),   1,      fp);
-    fwrite(MEM, sizeof(double),NUM*M*D,fp);
-    fclose(fp);
-  }
 
   return 0;
 }

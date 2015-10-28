@@ -83,39 +83,3 @@ char ** calloc2c (const int uw, const int ulen){
 }
 
 
-double ** readPoints(int *N, int *D, const char *file){
-  int n; FILE *fp; double **X;
-  fp=fopen(file,"rb");
-  fread(N,sizeof(int),1,fp);
-  fread(D,sizeof(int),1,fp);
-  X=calloc2d(*N,*D);
-  for(n=0;n<*N;n++)
-    fread(X[n],sizeof(double),*D,fp);
-  fclose(fp);
-  return X;
-}
-
-int writePoints(const char *file, const double **X, const int N, const int D){
-  int n,d; FILE *fp=fopen(file,"w");
-  for(n=0;n<N;n++)for(d=0;d<D;d++)
-    fprintf(fp,"%lf%c",X[n][d],d==D-1?'\n':'\t');
-  fclose(fp);
-  return 0;
-}
-
-int normPoints(double **X, const int N, const int D){
-  int n,d; double val,sgm;
-  for(d=0;d<D;d++){val=sgm=0;
-    for(n=0;n<N;n++)val+=X[n][d];val/=N;
-    for(n=0;n<N;n++)X[n][d]-=val;
-  }
-  for(n=0;n<N;n++)for(d=0;d<D;d++)sgm+=SQ(X[n][d]);sgm/=N*D;sgm=sqrt(sgm);
-  for(n=0;n<N;n++)for(d=0;d<D;d++)X[n][d]/=sgm;
-  return 0;
-}
-
-int rescalePoints(double **X, const int N, const int D, const double dz){
-  int i; if(D==3||fabs(dz-1.0)>1e-8) for(i=0;i<N;i++) X[i][2]*=dz;
-  return 0;
-}
-

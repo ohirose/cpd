@@ -25,9 +25,6 @@ typedef struct _sortbox{
   int    idx;
 } sortbox;
 
-int  fgetword (char *buff, FILE *fp, const char dlm);
-int  fgetline (char **words, int *nwords, char *buff, FILE *fp, const char dlm);
-
 void prepare_sortbox      (sortbox *sb, const double * array, const int size);
 int  cmp_sortbox          (const void *a, const void *b);
 
@@ -38,11 +35,5 @@ double *** calloc3d (const int L, const int M, const int N);
 short   ** calloc2s (const int M, const int N);
 double     dist2    (const double x1[3], const double x2[3], const int D);
 
-double ** readPoints(int *N, int *D, const char *file);
-int writePoints   (const char *file, const double **X, const int N, const int D);
-int normPoints    (double **X, const int N, const int D);
-int rescalePoints (double **X, const int N, const int D, const double dz);
-
 #define SQ(x) ((x)*(x))
-int dposv_(char *uplo, int *n, int *nrhs, double *a, int *lda, double *b, int *ldb, int *info);
 int NUM; double *MEM;

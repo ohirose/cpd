@@ -19,13 +19,11 @@
 // THE SOFTWARE.
 
 #include<stdio.h>
-#include<stdlib.h>
 #include<assert.h>
 #include<math.h>
 #include"util.h"
+#include"lpk.h"
 #define WSIZE 100
-int dgesdd_(char *jobz, int *M,int *N,double* A, int* lda, double *S, double *U, int*ldu,
-            double* Vt, int *ldvt, double *work, int *lwork, int *iwork, int *info);
 
 double det(const double *A, const int D){
   assert(D==2||D==3);
@@ -42,14 +40,15 @@ int rot(double       **  W,        /*  D+1 x  D          | Linear map           
         const double **  X,        /*  N   x  D          | Point set 1 (Data)    */
         const double **  Y,        /*  M   x  D          | Point set 2 (Data)    */
         const int        size[3],  /*  M, N, D           |                       */
-        const double     omg       /*  omg               |                       */
+        const double     prms[2]   /*  nloop,omg         |                       */
        ){
-  int i,j,m,n,d,M,N,D,lp,ws,wi[WSIZE]; int nloop,info; char jobz='A';
-  double conv,reg=1e-9,s,noise,sgm2=0,pres1=1e10,pres2=1e20,pren,val,c1,c2;
+  int i,j,m,n,d,M,N,D,lp,ws,wi[WSIZE]; int info; char jobz='A';
+  int nloop=(int)prms[0]; double omg=prms[1],reg=1e-9;
+  double conv,s,noise,sgm2=0,pres1=1e10,pres2=1e20,pren,val,c1,c2;
   double mX[3],mY[3],A[9],B[9],a[3],U[9],S[3],Vt[9],wd[WSIZE];
   double **R,*b,**PXc,**Xc,**Yc,**C1;
 
-  M=size[0];N=size[1];D=size[2];nloop=2000; assert(D<=3);
+  M=size[0];N=size[1];D=size[2]; assert(D<=3);
   R=W;b=W[3];PXc=C[0];Xc=C[1];Yc=C[2];C1=C[3];ws=WSIZE;
 
   /* initialize */
@@ -88,7 +87,6 @@ int rot(double       **  W,        /*  D+1 x  D          | Linear map           
     for(d=0;d<D;d++)for(i=0;i<D;i++)c1+=A[d+i*D]*R[d][i];
     for(d=0;d<D;d++)for(m=0;m<M;m++)c2+=SQ(Yc[m][d])*P[m][N]; s=c1/c2;
 
-    //s=1.0;
     for(d=0;d<D;d++){val=0;for(i=0;i<D;i++)val+=R[d][i]*mY[i];a[d]=mX[d]-s*val;}
     for(m=0;m<M;m++)for(d=0;d<D;d++){val=0;for(i=0;i<D;i++)val+=R[d][i]*Y[m][i];T[m][d]=s*val+a[d];}
 
@@ -101,46 +99,6 @@ int rot(double       **  W,        /*  D+1 x  D          | Linear map           
     if(fabs(conv)<1e-8)break;
 
   } NUM=lp==nloop?lp:lp+1;
-
-  return 0;
-}
-
-
-int main(int argc, char **argv){
-  int M,N,D,nlp=2000,size[4];double omg=0.8;
-  double **W,**T,**P,***C,**X,**Y;
-
-  if(argc==1){printf("./cpd <X> <Y>\n");exit(1);}
-
-  X=readPoints(&N,&D,argv[1]);
-  Y=readPoints(&M,&D,argv[2]);
-
-  normPoints(X,N,D);
-  normPoints(Y,M,D);
-
-  size[0]=M;size[1]=N;size[2]=D;
-  MEM=malloc(3*sizeof(int)+nlp*M*D*sizeof(double));
-
-  W = calloc2d(D+1,D);
-  T = calloc2d(M,  D);
-  P = calloc2d(M+1,N+1);
-  C = calloc3d(4,N>M?N:M,D);
-
-  #define CD (const double **)
-  rot(W,T,P,C,CD X,CD Y,size,omg);
-
-  writePoints("T1.txt",CD T,M,D);
-  writePoints("X1.txt",CD X,N,D);
-  writePoints("Y1.txt",CD Y,M,D);
-  #undef  CD
-
-  if(MEM){FILE *fp=fopen("ontheway.bin","wb");
-    fwrite(&M,  sizeof(int),   1,      fp);
-    fwrite(&D,  sizeof(int),   1,      fp);
-    fwrite(&NUM,sizeof(int),   1,      fp);
-    fwrite(MEM, sizeof(double),NUM*M*D,fp);
-    fclose(fp);
-  }
 
   return 0;
 }

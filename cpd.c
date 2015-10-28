@@ -25,10 +25,10 @@
 o-----------------------------------------------------------------------------*/
 
 #include<stdio.h>
-#include<stdlib.h>
 #include<assert.h>
 #include<math.h>
 #include"util.h"
+#include"lpk.h"
 
 int cpd(double       **  W,        /*  M   x  D   | displacement matrix   */
         double       **  T,        /*  M   x  D   | Moved reference       */
@@ -40,14 +40,14 @@ int cpd(double       **  W,        /*  M   x  D   | displacement matrix   */
         const double **  X,        /*  N   x  D   | Point set 1 (Data)    */
         const double **  Y,        /*  N   x  D   | Point set 2 (Data)    */
         const int        size[3],  /*  M,  N, D                           */
-        const double     prms[4]   /*  omg,bet,lmd,nloop                  */
+        const double     prms[4]   /*  nloop,omg,bet,lmd,                  */
        ){
   int    i,m,n,d,M,N,D,lp,nloop,info; char uplo='U';
   double omg,lmd,bet2,reg=1e-9;
   double sgm2=0,noise,val,pres1=1e10,pres2=1e20,pren,conv;
 
   M=size[0];N=size[1];D=size[2];
-  omg=prms[0];bet2=SQ(prms[1]);lmd=prms[2];nloop=(int)prms[3];
+  nloop=(int)prms[0];omg=prms[1];bet2=SQ(prms[2]);lmd=prms[3];
 
   /* initialize */
   for(m=0;m<M;m++)for(d=0;d<D;d++) W[m][d]=0;
@@ -89,60 +89,6 @@ int cpd(double       **  W,        /*  M   x  D   | displacement matrix   */
 
     if(fabs(conv)<1e-8)break;
   } NUM=lp==nloop?lp:lp+1;
-
-  return 0;
-}
-
-int readPrms(double prms[6],const char *file){
-  FILE* fp=fopen(file,"r");
-  fscanf(fp,"omg:%lf\n", prms+0);
-  fscanf(fp,"bet:%lf\n", prms+1);
-  fscanf(fp,"lmd:%lf\n", prms+2);
-  fscanf(fp,"nlp:%lf\n", prms+3);
-  fscanf(fp,"dz:%lf\n",  prms+4);
-  fscanf(fp,"mem:%lf\n", prms+5);
-  fclose(fp);
-  return 0;
-}
-
-int main(int argc, char **argv){
-  int M,N,D,nlp,size[3];double dz,prms[6];
-  double **W,**T,**G,**P,**C,*A,*B,**X,**Y;
-
-  if(argc==1){printf("./cpd <X> <Y>\n");exit(1);}
-
-  X=readPoints(&N,&D,argv[1]);
-  Y=readPoints(&M,&D,argv[2]);
-  size[0]=M;size[1]=N;size[2]=D;
-
-  readPrms(prms,"prms.txt"); nlp=prms[3];dz=prms[4];
-
-  rescalePoints(X,N,D,dz);
-  rescalePoints(Y,M,D,dz);
-  normPoints(X,N,D);
-  normPoints(Y,M,D);
-
-  W = calloc2d(M,D); T=calloc2d(M,D);
-  G = calloc2d(M,M); C=calloc2d(M,D); P=calloc2d(M+1,N+1);
-  A = calloc(M*M,sizeof(double));
-  B = calloc(M*D,sizeof(double));
-  MEM=prms[5]>0?malloc(3*sizeof(int)+nlp*M*D*sizeof(double)):NULL;
-
-  #define CD (const double **)
-  cpd(W,T,G,P,C,A,B,CD X,CD Y,size,prms);
-
-  writePoints("T1.txt",CD T,M,D);
-  writePoints("X1.txt",CD X,N,D);
-  writePoints("Y1.txt",CD Y,M,D);
-  #undef  CD
-
-  if(MEM){FILE *fp=fopen("ontheway.bin","wb");
-    fwrite(&M,  sizeof(int),   1,      fp);
-    fwrite(&D,  sizeof(int),   1,      fp);
-    fwrite(&NUM,sizeof(int),   1,      fp);
-    fwrite(MEM, sizeof(double),NUM*M*D,fp);
-    fclose(fp);
-  }
 
   return 0;
 }
