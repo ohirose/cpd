@@ -43,7 +43,6 @@ int affine(double       **  W,        /*  D+1 x  D          | Linear map        
   F=W;b=W[3];PXc=C[0];Xc=C[1];Yc=C[2];C1=C[3];
 
   /* initialize */
-  //for(d=0;d<D;d++)for(i=0;i<D;i++) F[d][i]=d==i?1:0;
   for(m=0;m<M;m++)for(d=0;d<D;d++) T[m][d]=Y[m][d];
   for(m=0;m<M;m++)for(n=0;n<N;n++) sgm2+=dist2(X[n],Y[m],D);sgm2/=M*N*D;
 
@@ -88,10 +87,6 @@ int affine(double       **  W,        /*  D+1 x  D          | Linear map        
     printf("loop=%d\tsgm2=%lf\tnoise=%lf\tconv=%lf\n",lp,sgm2,noise,conv);
     if(fabs(conv)<1e-8)break;
 
-    //double conv1=log(pres)-log(sgm2 );
-    //double conv2=log(pren)-log(noise);
-    //printf("loop=%d\tsgm2=%lf\tnoise=%lf\tconv1=%lf\tconv2=%lf\n",lp,sgm2,noise,conv1,conv2);
-    //flag=fabs(conv1)<1e-8||fabs(conv2)<1e-8; if(lp&&flag)break;
   } NUM=lp==nloop?lp:lp+1;
 
   return 0;
