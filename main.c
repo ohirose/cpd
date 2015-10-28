@@ -99,9 +99,9 @@ int main(int argc, char **argv){
   int M,N,D,nlp,size[3],flag[4];double prms[6];
   double **W,**T,**G,**P,***C,*A,*B,**X,**Y,**Z;
 
-  if(argc==1){
+  if(argc!=4){
     printf("./cpd <mode> <X> <Y>\n\n");
-    printf("NOTE: One of characters r, a, and c must be included in <mode>.         \n");
+    printf("NOTE: At least one of characters r, a, and c must be included in <mode>.\n");
     printf("Optionally, m can be attatched to <mode> which specifies a print option.\n");
     printf("\n");
     exit(1);
@@ -112,9 +112,9 @@ int main(int argc, char **argv){
   flag[2]=strchr(argv[1],(int)'c')!=NULL?1:0;
   flag[3]=strchr(argv[1],(int)'m')!=NULL?1:0;
 
-  readPrms(prms,"prms.txt"); 
+  readPrms(prms,"prms.txt");
   X=readPoints(&N,&D,argv[2]);
-  Y=readPoints(&M,&D,argv[3]); Z=Y;
+  Y=readPoints(&M,&D,argv[3]);
   size[0]=M;size[1]=N;size[2]=D;nlp=prms[0];
 
   W = calloc2d(M,  D  ); A = calloc  (M*M,sizeof(double));
@@ -130,9 +130,9 @@ int main(int argc, char **argv){
   normPoints    (Y,M,D);
 
   #define CD (const double **)
-  if(flag[0]){rot    (W,T,P,C,         CD X,CD Z,size,prms);if(MEM) printOptProcess("otw-r.bin",M,D);} 
-  if(flag[1]){affine (W,T,P,C,         CD X,CD Y,size,prms);if(MEM) printOptProcess("otw-a.bin",M,D);}
-  if(flag[2]){cpd    (W,T,G,P,C[0],A,B,CD X,CD Y,size,prms);if(MEM) printOptProcess("otw-c.bin",M,D);}
+  if(flag[0]){rot    (W,T,P,C,CD X,CD Y,size,prms);Z=Y;Y=T;T=Z;if(MEM) printOptProcess("otw-r.bin",M,D);}
+  if(flag[1]){affine (W,T,P,C,CD X,CD Y,size,prms);Z=Y;Y=T;T=Z;if(MEM) printOptProcess("otw-a.bin",M,D);}
+  if(flag[2]){cpd    (W,T,G,P,C[0],A,B,CD X,CD Y,size,prms);   if(MEM) printOptProcess("otw-c.bin",M,D);}
 
   writePoints("T1.txt", CD T,M,D);
   writePoints("X1.txt", CD X,N,D);
