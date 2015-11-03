@@ -28,13 +28,15 @@ int affine(double       **  W,        /*  D+1 x  D          | Linear map        
            double       **  T,        /*  M   x  D          | Moved points          */
            double       **  P,        /*  M+1 x  N+1        | Assighment probablity */
            double       *** C,        /*  4 x max(M,N) x D  | Working memory        */
+           double       *   Q,        /*  nlp x M x D       | Working wemory (3D)   */
            const double **  X,        /*  N   x  D          | Point set 1 (Data)    */
            const double **  Y,        /*  M   x  D          | Point set 2 (Data)    */
-           const int        size[3],  /*  M, N, D           |                       */
-           const double     prms[2]   /*  nloop, omg        |                       */
+           const int        size[3],  /*  M,  N, D          |                       */
+           const double     prms[2],  /*  parameters: nloop, omg                    */
+           const int        verb      /*  flag: verbose                             */
           ){
   int i,m,n,d,M,N,D,lp,info; char uplo='U';
-  int nloop=(int)prms[0]; double omg=prms[1],reg=1e-9;
+  int nlp=(int)prms[0]; double omg=prms[1],reg=1e-9;
   double sgm2=0,noise,pres1=1e10,pres2=1e20,pren,conv;
   double mX[3],mY[3],A[9],B[9],a[3];
   double **F,*b,**PXc,**Xc,**Yc,**C1;
@@ -46,8 +48,8 @@ int affine(double       **  W,        /*  D+1 x  D          | Linear map        
   for(m=0;m<M;m++)for(d=0;d<D;d++) T[m][d]=Y[m][d];
   for(m=0;m<M;m++)for(n=0;n<N;n++) sgm2+=dist2(X[n],Y[m],D);sgm2/=M*N*D;
 
-  for(lp=0;lp<nloop;lp++){pren=noise;noise=(pow(2.0*M_PI*sgm2,0.5*D)*M*omg)/(N*(1-omg));
-    if(MEM)for(m=0;m<M;m++)for(d=0;d<D;d++) MEM[m+d*M+lp*M*D]=T[m][d];
+  for(lp=0;lp<nlp;lp++){pren=noise;noise=(pow(2.0*M_PI*sgm2,0.5*D)*M*omg)/(N*(1-omg));
+    if(Q)for(m=0;m<M;m++)for(d=0;d<D;d++) Q[m+d*M+lp*M*D]=T[m][d];
 
     /* compute P */
     for(n=0;n<=N;n++) P[M][n]=0;
@@ -84,11 +86,10 @@ int affine(double       **  W,        /*  D+1 x  D          | Linear map        
     sgm2/=P[M][N]*D;
 
     conv=log(pres2)-log(sgm2 );
-    printf("loop=%d\tsgm2=%lf\tnoise=%lf\tconv=%lf\n",lp,sgm2,noise,conv);
+    if(verb) printf("loop=%d\tsgm2=%lf\tnoise=%lf\tconv=%lf\n",lp,sgm2,noise,conv);
     if(fabs(conv)<1e-8)break;
+  }
 
-  } NUM=lp==nloop?lp:lp+1;
-
-  return 0;
+  return lp;
 }
 

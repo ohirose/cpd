@@ -32,20 +32,25 @@ o-----------------------------------------------------------------------------*/
 #include"util.h"
 #include"func.h"
 
-double ** readPoints(int *N, int *D, const char *file){
-  int n; FILE *fp; double **X;
+double ** readPoints(int *nr, int *nc, const char *file, const char mode){
+  int n,d,L,N,D,si,sd; FILE *fp; double **X,*b;
+  si=sizeof(int   );
+  sd=sizeof(double);
+
   fp=fopen(file,"rb");
-  fread(N,sizeof(int),1,fp);
-  fread(D,sizeof(int),1,fp);
+  fread(nr,si,1,fp);
+  fread(nc,si,1,fp); N=*nr;D=*nc;L=N*D;
 
   if(N<D){
     printf("The number of points in a point set is at least \n");
     printf("the dimension of the vector space. Abort.       \n"); exit(1);
   }
 
-  X=calloc2d(*N,*D);
-  for(n=0;n<*N;n++) fread(X[n],sizeof(double),*D,fp);
-  fclose(fp);
+  X=calloc2d(N,D);b=malloc(sd*L);fread(b,sd,L,fp);fclose(fp);
+  switch(mode){
+    case 'r': for(n=0;n<N;n++)for(d=0;d<D;d++) X[n][d]=b[d+n*D]; break;
+    case 'c': for(n=0;n<N;n++)for(d=0;d<D;d++) X[n][d]=b[n+d*N]; break;
+  } free(b);
 
   return X;
 }
@@ -70,7 +75,7 @@ int normPoints(double **X, const int N, const int D){
 }
 
 int rescalePoints(double **X, const int N, const int D, const double dz){
-  int i; if(D==3||fabs(dz-1.0)>1e-8) for(i=0;i<N;i++) X[i][2]*=dz;
+  int i; if(D==3&&fabs(dz-1.0)>1e-8) for(i=0;i<N;i++) X[i][2]*=dz;
   return 0;
 }
 
@@ -85,36 +90,38 @@ int readPrms(double prms[5],const char *file){
   return 0;
 }
 
-int printOptProcess(const char *file, const int M, const int D){
-  if(MEM){FILE *fp=fopen(file,"wb");
-    fwrite(&M,  sizeof(int),   1,      fp);
-    fwrite(&D,  sizeof(int),   1,      fp);
-    fwrite(&NUM,sizeof(int),   1,      fp);
-    fwrite(MEM, sizeof(double),NUM*M*D,fp);
+int printOptProcess(const char *file, const double *Q, const int lp, const int M, const int D){
+  if(Q){FILE *fp=fopen(file,"wb");
+    fwrite(&M, sizeof(int),   1,     fp);
+    fwrite(&D, sizeof(int),   1,     fp);
+    fwrite(&lp,sizeof(int),   1,     fp);
+    fwrite(Q,  sizeof(double),lp*M*D,fp);
     fclose(fp);
   } return 0;
 }
 
 int main(int argc, char **argv){
-  int M,N,D,nlp,size[3],flag[4];double prms[6];
-  double **W,**T,**G,**P,***C,*A,*B,**X,**Y,**Z;
+  int M,N,D,nlp,nlpr[3],size[3],flag=0,verb;double prms[6];
+  double **W,**T,**G,**P,***C,*A,*B,**X,**Y,**Z,*Q0,*Q1,*Q2;
 
   if(argc!=4){
     printf("./cpd <mode> <X> <Y>\n\n");
-    printf("NOTE: At least one of characters r, a, and c must be included in <mode>.\n");
-    printf("Optionally, m can be attatched to <mode> which specifies a print option.\n");
+    printf("NOTE: At least one of characters r, a, and c must be included in <mode>.       \n");
+    printf("Optionally, m and i can be attatched to <mode> which specifies a print option. \n");
+    printf("r: rotate, a: affine, c: cpd, i: information, m: memorize optimization process.\n");
     printf("\n");
     exit(1);
   }
 
-  flag[0]=strchr(argv[1],(int)'r')!=NULL?1:0;
-  flag[1]=strchr(argv[1],(int)'a')!=NULL?1:0;
-  flag[2]=strchr(argv[1],(int)'c')!=NULL?1:0;
-  flag[3]=strchr(argv[1],(int)'m')!=NULL?1:0;
+  flag+=strchr(argv[1],(int)'r')!=NULL?1:0;
+  flag+=strchr(argv[1],(int)'a')!=NULL?2:0;
+  flag+=strchr(argv[1],(int)'c')!=NULL?4:0;
+  flag+=strchr(argv[1],(int)'m')!=NULL?8:0;
+  verb =strchr(argv[1],(int)'i')!=NULL?1:0;
 
   readPrms(prms,"prms.txt");
-  X=readPoints(&N,&D,argv[2]);
-  Y=readPoints(&M,&D,argv[3]);
+  X=readPoints(&N,&D,argv[2],'r');
+  Y=readPoints(&M,&D,argv[3],'r');
   size[0]=M;size[1]=N;size[2]=D;nlp=prms[0];
 
   W = calloc2d(M,  D  ); A = calloc  (M*M,sizeof(double));
@@ -122,7 +129,9 @@ int main(int argc, char **argv){
   G = calloc2d(M,  M  ); C = calloc3d(4,N>M?N:M,D);
   P = calloc2d(M+1,N+1); 
 
-  MEM=flag[3]>0?malloc(3*sizeof(int)+nlp*M*D*sizeof(double)):NULL;
+  Q0=flag&1?malloc(nlp*M*D*sizeof(double)):NULL;
+  Q1=flag&2?malloc(nlp*M*D*sizeof(double)):NULL;
+  Q2=flag&4?malloc(nlp*M*D*sizeof(double)):NULL;
 
   rescalePoints (X,N,D,prms[4]);
   rescalePoints (Y,M,D,prms[4]);
@@ -130,14 +139,20 @@ int main(int argc, char **argv){
   normPoints    (Y,M,D);
 
   #define CD (const double **)
-  if(flag[0]){rot    (W,T,P,C,CD X,CD Y,size,prms);Z=Y;Y=T;T=Z;if(MEM) printOptProcess("otw-r.bin",M,D);}
-  if(flag[1]){affine (W,T,P,C,CD X,CD Y,size,prms);Z=Y;Y=T;T=Z;if(MEM) printOptProcess("otw-a.bin",M,D);}
-  if(flag[2]){cpd    (W,T,G,P,C[0],A,B,CD X,CD Y,size,prms);   if(MEM) printOptProcess("otw-c.bin",M,D);}
+  if(flag&1) {nlpr[0]=rot   (W,T,P,C,Q0,CD X,CD Y,size,prms,verb); if(flag&6){Z=Y;Y=T;T=Z;}} 
+  if(flag&2) {nlpr[1]=affine(W,T,P,C,Q1,CD X,CD Y,size,prms,verb); if(flag&4){Z=Y;Y=T;T=Z;}}
+  if(flag&4) {nlpr[2]=cpd   (W,T,G,P,C[0],A,B,Q2,CD X,CD Y,size,prms,verb);}
 
   writePoints("T1.txt", CD T,M,D);
   writePoints("X1.txt", CD X,N,D);
   writePoints("Y1.txt", CD Y,M,D);
   #undef  CD
+
+  #define CD (const double * )
+  if(Q0) printOptProcess("otw-r.bin",CD Q0,nlpr[0],M,D);
+  if(Q1) printOptProcess("otw-a.bin",CD Q1,nlpr[1],M,D);
+  if(Q2) printOptProcess("otw-c.bin",CD Q2,nlpr[2],M,D);
+  #undef  CD1
 
   return 0;
 }
