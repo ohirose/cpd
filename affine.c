@@ -37,18 +37,18 @@ int affine(double       **  W,        /*  D+1 x  D          | Linear map        
           ){
   int i,m,n,d,M,N,D,lp,info; char uplo='U';
   int nlp=(int)prms[0]; double omg=prms[1],reg=1e-9;
-  double sgm2=0,noise,pres1=1e10,pres2=1e20,pren,conv;
+  double sgm2=0,noise,pres1=1e10,pres2=1e20,conv;
   double mX[3],mY[3],A[9],B[9],a[3];
-  double **F,*b,**PXc,**Xc,**Yc,**C1;
+  double **F,**PXc,**Xc,**Yc,**C1;
 
   M=size[0];N=size[1];D=size[2]; assert(D<=3);
-  F=W;b=W[3];PXc=C[0];Xc=C[1];Yc=C[2];C1=C[3];
+  F=W;PXc=C[0];Xc=C[1];Yc=C[2];C1=C[3];
 
   /* initialize */
   for(m=0;m<M;m++)for(d=0;d<D;d++) T[m][d]=Y[m][d];
   for(m=0;m<M;m++)for(n=0;n<N;n++) sgm2+=dist2(X[n],Y[m],D);sgm2/=M*N*D;
 
-  for(lp=0;lp<nlp;lp++){pren=noise;noise=(pow(2.0*M_PI*sgm2,0.5*D)*M*omg)/(N*(1-omg));
+  for(lp=0;lp<nlp;lp++){noise=(pow(2.0*M_PI*sgm2,0.5*D)*M*omg)/(N*(1-omg));
     if(Q)for(m=0;m<M;m++)for(d=0;d<D;d++) Q[m+d*M+lp*M*D]=T[m][d];
 
     /* compute P */

@@ -101,7 +101,7 @@ int printOptProcess(const char *file, const double *Q, const int lp, const int M
 }
 
 int main(int argc, char **argv){
-  int M,N,D,nlp,nlpr[3],size[3],flag=0,verb;double prms[6];
+  int M,N,D,nlp,nlpr[3]={0,0,0},size[3],flag=0,verb;double prms[6];
   double **W,**T,**G,**P,***C,*A,*B,**X,**Y,**Z,*Q0,*Q1,*Q2;
 
   if(argc!=4){

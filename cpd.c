@@ -46,7 +46,7 @@ int cpd(double       **  W,        /*  M   x  D   | displacement matrix   */
        ){
   int    i,m,n,d,M,N,D,lp,nlp,info; char uplo='U';
   double omg,lmd,bet2,reg=1e-9;
-  double sgm2=0,noise,val,pres1=1e10,pres2=1e20,pren,conv;
+  double sgm2=0,noise,val,pres1=1e10,pres2=1e20,conv;
 
   M=size[0];N=size[1];D=size[2];
   nlp=(int)prms[0];omg=prms[1];bet2=SQ(prms[2]);lmd=prms[3];
@@ -57,7 +57,7 @@ int cpd(double       **  W,        /*  M   x  D   | displacement matrix   */
   for(m=0;m<M;m++)for(n=0;n<N;n++) sgm2+=dist2(X[n],Y[m],D);sgm2/=M*N*D;
   for(m=0;m<M;m++)for(i=0;i<M;i++) G[m][i]=exp(-dist2(Y[m],Y[i],D)/(2*bet2));
 
-  for(lp=0;lp<nlp;lp++){pren=noise;noise=(pow(2.0*M_PI*sgm2,0.5*D)*M*omg)/(N*(1-omg));
+  for(lp=0;lp<nlp;lp++){noise=(pow(2.0*M_PI*sgm2,0.5*D)*M*omg)/(N*(1-omg));
     if(Q)for(m=0;m<M;m++)for(d=0;d<D;d++) Q[m+d*M+lp*M*D]=T[m][d];
 
     /* compute P */
