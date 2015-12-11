@@ -37,7 +37,7 @@ double ** readPoints(int *nr, int *nc, const char *file, const char mode){
   si=sizeof(int   );
   sd=sizeof(double);
 
-  fp=fopen(file,"rb");
+  fp=fopen(file,"rb");if(!fp){printf("File not found: %s\n",file);exit(EXIT_FAILURE);}
   fread(nr,si,1,fp);
   fread(nc,si,1,fp); N=*nr;D=*nc;L=N*D;
 
@@ -56,31 +56,36 @@ double ** readPoints(int *nr, int *nc, const char *file, const char mode){
 }
 
 int writePoints(const char *file, const double **X, const int N, const int D){
-  int n,d; FILE *fp=fopen(file,"w");
+  int n,d; FILE *fp=fopen(file,"w");if(!fp){printf("Can't open: %s\n",file);exit(EXIT_FAILURE);}
   for(n=0;n<N;n++)for(d=0;d<D;d++)
     fprintf(fp,"%lf%c",X[n][d],d==D-1?'\n':'\t');
   fclose(fp);
   return 0;
 }
 
-int normPoints(double **X, const int N, const int D){
-  int n,d; double val,sgm;
-  for(d=0;d<D;d++){val=sgm=0;
-    for(n=0;n<N;n++)val+=X[n][d];val/=N;
-    for(n=0;n<N;n++)X[n][d]-=val;
-  }
-  for(n=0;n<N;n++)for(d=0;d<D;d++)sgm+=SQ(X[n][d]);sgm/=N*D;sgm=sqrt(sgm);
-  for(n=0;n<N;n++)for(d=0;d<D;d++)X[n][d]/=sgm;
+int scalePoints(double **X, const int N, const int D, const double *scale){
+  int n,d; for(n=0;n<N;n++)for(d=0;d<D;d++) X[n][d]*=scale[d];
   return 0;
 }
 
-int rescalePoints(double **X, const int N, const int D, const double dz){
-  int i; if(D==3&&fabs(dz-1.0)>1e-8) for(i=0;i<N;i++) X[i][2]*=dz;
+int shiftPoints(double **X, const double *v, const int N, const int D){
+  int n,d; for(n=0;n<N;n++)for(d=0;d<D;d++) X[n][d]-=v[d];
+  return 0;
+}
+
+int meanPoints(double *mu, const double **X, const int N, const int D){
+  int n,d; for(d=0;d<D;d++){mu[d]=0;for(n=0;n<N;n++)mu[d]+=X[n][d];mu[d]/=N;}
+  return 0;
+}
+
+int sdevPoints(double *sgm, const double **X, const int N, const int D){
+  int n,d; double v=0,mu[3]; meanPoints(mu,X,N,D);
+  for(n=0;n<N;n++)for(d=0;d<D;d++)v+=SQ(X[n][d]-mu[d]);v/=N*D;*sgm=sqrt(v);
   return 0;
 }
 
 int readPrms(double prms[5],const char *file){
-  FILE* fp=fopen(file,"r");
+  FILE* fp=fopen(file,"r");if(!fp){printf("File not found: %s\n",file);exit(EXIT_FAILURE);}
   fscanf(fp,"nlp:%lf\n", prms+0);
   fscanf(fp,"omg:%lf\n", prms+1);
   fscanf(fp,"bet:%lf\n", prms+2);
@@ -91,7 +96,7 @@ int readPrms(double prms[5],const char *file){
 }
 
 int printOptProcess(const char *file, const double *Q, const int lp, const int M, const int D){
-  if(Q){FILE *fp=fopen(file,"wb");
+  if(Q){FILE *fp=fopen(file,"wb");if(!fp){printf("Can't open: %s\n",file);exit(EXIT_FAILURE);}
     fwrite(&M, sizeof(int),   1,     fp);
     fwrite(&D, sizeof(int),   1,     fp);
     fwrite(&lp,sizeof(int),   1,     fp);
@@ -101,8 +106,9 @@ int printOptProcess(const char *file, const double *Q, const int lp, const int M
 }
 
 int main(int argc, char **argv){
-  int M,N,D,nlp,nlpr[3]={0,0,0},size[3],flag=0,verb;double prms[6];
+  int d,M,N,D,nlp,nlpr[3]={0,0,0},size[3],flag=0,verb; double prms[6];
   double **W,**T,**G,**P,***C,*A,*B,**X,**Y,**Z,*Q0,*Q1,*Q2;
+  double sgmX,sgmY,muX[3],muY[3],scl[3],asp[3]={1,1,1};
 
   if(argc!=4){
     printf("./cpd <mode> <X> <Y>\n\n");
@@ -133,12 +139,14 @@ int main(int argc, char **argv){
   Q1=flag&2?malloc(nlp*M*D*sizeof(double)):NULL;
   Q2=flag&4?malloc(nlp*M*D*sizeof(double)):NULL;
 
-  rescalePoints (X,N,D,prms[4]);
-  rescalePoints (Y,M,D,prms[4]);
-  normPoints    (X,N,D);
-  normPoints    (Y,M,D);
+  #define CD  (const double **)
+  #define CD1 (const double * )
+  if(D==3) asp[2]=prms[4];
+  scalePoints(X,N,D,asp); meanPoints(muX,CD X,N,D); sdevPoints(&sgmX,CD X,N,D);
+  scalePoints(Y,M,D,asp); meanPoints(muY,CD Y,M,D); sdevPoints(&sgmY,CD Y,M,D);
+  shiftPoints(X,CD1 muX,N,D); for(d=0;d<D;d++)scl[d]=1.0/sgmX; scalePoints(X,N,D,scl);
+  shiftPoints(Y,CD1 muY,M,D); for(d=0;d<D;d++)scl[d]=1.0/sgmY; scalePoints(Y,M,D,scl);
 
-  #define CD (const double **)
   if(flag&1) {nlpr[0]=rot   (W,T,P,C,Q0,CD X,CD Y,size,prms,verb); if(flag&6){Z=Y;Y=T;T=Z;}} 
   if(flag&2) {nlpr[1]=affine(W,T,P,C,Q1,CD X,CD Y,size,prms,verb); if(flag&4){Z=Y;Y=T;T=Z;}}
   if(flag&4) {nlpr[2]=cpd   (W,T,G,P,C[0],A,B,Q2,CD X,CD Y,size,prms,verb);}
@@ -146,13 +154,10 @@ int main(int argc, char **argv){
   writePoints("T1.txt", CD T,M,D);
   writePoints("X1.txt", CD X,N,D);
   writePoints("Y1.txt", CD Y,M,D);
-  #undef  CD
 
-  #define CD (const double * )
-  if(Q0) printOptProcess("otw-r.bin",CD Q0,nlpr[0],M,D);
-  if(Q1) printOptProcess("otw-a.bin",CD Q1,nlpr[1],M,D);
-  if(Q2) printOptProcess("otw-c.bin",CD Q2,nlpr[2],M,D);
-  #undef  CD1
+  if(Q0) printOptProcess("otw-r.bin",CD1 Q0,nlpr[0],M,D);
+  if(Q1) printOptProcess("otw-a.bin",CD1 Q1,nlpr[1],M,D);
+  if(Q2) printOptProcess("otw-c.bin",CD1 Q2,nlpr[2],M,D);
 
   return 0;
 }
