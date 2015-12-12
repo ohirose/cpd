@@ -84,6 +84,16 @@ int sdevPoints(double *sgm, const double **X, const int N, const int D){
   return 0;
 }
 
+int normPoints(double **X, double *mu, double *sgm, const int N, const int D){
+  int d; double scl[3];
+  meanPoints (mu, (const double**) X, N,D);
+  sdevPoints (sgm,(const double**) X, N,D);
+  shiftPoints(X,  (const double* ) mu,N,D);
+  for(d=0;d<D;d++)scl[d]=1.0/(*sgm);
+  scalePoints(X,N,D,scl);
+  return 0;
+}
+
 int readPrms(double prms[5],const char *file){
   FILE* fp=fopen(file,"r");if(!fp){printf("File not found: %s\n",file);exit(EXIT_FAILURE);}
   fscanf(fp,"nlp:%lf\n", prms+0);
@@ -106,9 +116,9 @@ int printOptProcess(const char *file, const double *Q, const int lp, const int M
 }
 
 int main(int argc, char **argv){
-  int d,M,N,D,nlp,nlpr[3]={0,0,0},size[3],flag=0,verb; double prms[6];
+  int M,N,D,nlp,nlpr[3]={0,0,0},size[3],flag=0,verb; double prms[6];
   double **W,**T,**G,**P,***C,*A,*B,**X,**Y,**Z,*Q0,*Q1,*Q2;
-  double sgmX,sgmY,muX[3],muY[3],scl[3],asp[3]={1,1,1};
+  double sgmX,sgmY,muX[3],muY[3],asp[3]={1,1,1};
 
   if(argc!=4){
     printf("./cpd <mode> <X> <Y>\n\n");
@@ -133,7 +143,7 @@ int main(int argc, char **argv){
   W = calloc2d(M,  D  ); A = calloc  (M*M,sizeof(double));
   T = calloc2d(M,  D  ); B = calloc  (M*D,sizeof(double));
   G = calloc2d(M,  M  ); C = calloc3d(4,N>M?N:M,D);
-  P = calloc2d(M+1,N+1); 
+  P = calloc2d(M+1,N+1);
 
   Q0=flag&1?malloc(nlp*M*D*sizeof(double)):NULL;
   Q1=flag&2?malloc(nlp*M*D*sizeof(double)):NULL;
@@ -142,12 +152,10 @@ int main(int argc, char **argv){
   #define CD  (const double **)
   #define CD1 (const double * )
   if(D==3) asp[2]=prms[4];
-  scalePoints(X,N,D,asp); meanPoints(muX,CD X,N,D); sdevPoints(&sgmX,CD X,N,D);
-  scalePoints(Y,M,D,asp); meanPoints(muY,CD Y,M,D); sdevPoints(&sgmY,CD Y,M,D);
-  shiftPoints(X,CD1 muX,N,D); for(d=0;d<D;d++)scl[d]=1.0/sgmX; scalePoints(X,N,D,scl);
-  shiftPoints(Y,CD1 muY,M,D); for(d=0;d<D;d++)scl[d]=1.0/sgmY; scalePoints(Y,M,D,scl);
+  scalePoints(X,N,D,asp); normPoints(X,muX,&sgmX,N,D);
+  scalePoints(Y,M,D,asp); normPoints(Y,muY,&sgmY,M,D);
 
-  if(flag&1) {nlpr[0]=rot   (W,T,P,C,Q0,CD X,CD Y,size,prms,verb); if(flag&6){Z=Y;Y=T;T=Z;}} 
+  if(flag&1) {nlpr[0]=rot   (W,T,P,C,Q0,CD X,CD Y,size,prms,verb); if(flag&6){Z=Y;Y=T;T=Z;}}
   if(flag&2) {nlpr[1]=affine(W,T,P,C,Q1,CD X,CD Y,size,prms,verb); if(flag&4){Z=Y;Y=T;T=Z;}}
   if(flag&4) {nlpr[2]=cpd   (W,T,G,P,C[0],A,B,Q2,CD X,CD Y,size,prms,verb);}
 
