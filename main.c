@@ -68,29 +68,16 @@ int scalePoints(double **X, const int N, const int D, const double *scale){
   return 0;
 }
 
-int shiftPoints(double **X, const double *v, const int N, const int D){
-  int n,d; for(n=0;n<N;n++)for(d=0;d<D;d++) X[n][d]-=v[d];
-  return 0;
-}
-
-int meanPoints(double *mu, const double **X, const int N, const int D){
-  int n,d; for(d=0;d<D;d++){mu[d]=0;for(n=0;n<N;n++)mu[d]+=X[n][d];mu[d]/=N;}
-  return 0;
-}
-
-int sdevPoints(double *sgm, const double **X, const int N, const int D){
-  int n,d; double v=0,mu[3]; meanPoints(mu,X,N,D);
-  for(n=0;n<N;n++)for(d=0;d<D;d++)v+=SQ(X[n][d]-mu[d]);v/=N*D;*sgm=sqrt(v);
-  return 0;
-}
-
 int normPoints(double **X, double *mu, double *sgm, const int N, const int D){
-  int d; double scl[3];
-  meanPoints (mu, (const double**) X, N,D);
-  sdevPoints (sgm,(const double**) X, N,D);
-  shiftPoints(X,  (const double* ) mu,N,D);
-  for(d=0;d<D;d++)scl[d]=1.0/(*sgm);
-  scalePoints(X,N,D,scl);
+  int n,d; double val=0;
+  for(d=0;d<D;d++){mu[d]=0;for(n=0;n<N;n++) mu[d]+=X[n][d];mu[d]/=N;}
+  for(n=0;n<N;n++)for(d=0;d<D;d++) val +=SQ(X[n][d]-mu[d]); val/=N*D;*sgm=sqrt(val);
+  for(n=0;n<N;n++)for(d=0;d<D;d++) X[n][d]=(X[n][d]-mu[d])/(*sgm);
+  return 0;
+}
+
+int revertPoints(double **X, double *mu, double *sgm, const int N, const int D){
+  int n,d; for(n=0;n<N;n++)for(d=0;d<D;d++) X[n][d]=X[n][d]*(*sgm)+mu[d];
   return 0;
 }
 
@@ -118,7 +105,7 @@ int printOptProcess(const char *file, const double *Q, const int lp, const int M
 int main(int argc, char **argv){
   int M,N,D,nlp,nlpr[3]={0,0,0},size[3],flag=0,verb; double prms[6];
   double **W,**T,**G,**P,***C,*A,*B,**X,**Y,**Z,*Q0,*Q1,*Q2;
-  double sgmX,sgmY,muX[3],muY[3],asp[3]={1,1,1};
+  double sgmX,sgmY,muX[3],muY[3],asp[3]={1,1,1},iasp[3]={1,1,1};
 
   if(argc!=4){
     printf("./cpd <mode> <X> <Y>\n\n");
@@ -151,7 +138,7 @@ int main(int argc, char **argv){
 
   #define CD  (const double **)
   #define CD1 (const double * )
-  if(D==3) asp[2]=prms[4];
+  if(D==3) {asp[2]=prms[4];iasp[2]=1.0/prms[4];}
   scalePoints(X,N,D,asp); normPoints(X,muX,&sgmX,N,D);
   scalePoints(Y,M,D,asp); normPoints(Y,muY,&sgmY,M,D);
 
