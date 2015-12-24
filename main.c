@@ -146,9 +146,14 @@ int main(int argc, char **argv){
   if(flag&2) {nlpr[1]=affine(W,T,P,C,Q1,CD X,CD Y,size,prms,verb); if(flag&4){Z=Y;Y=T;T=Z;}}
   if(flag&4) {nlpr[2]=cpd   (W,T,G,P,C[0],A,B,Q2,CD X,CD Y,size,prms,verb);}
 
+  revertPoints(T,muX,&sgmX,M,D); scalePoints(T,M,D,iasp);
+  revertPoints(Y,muY,&sgmY,M,D); scalePoints(Y,M,D,iasp);
+  revertPoints(X,muX,&sgmX,N,D); scalePoints(X,N,D,iasp);
+
   writePoints("T1.txt", CD T,M,D);
   writePoints("X1.txt", CD X,N,D);
   writePoints("Y1.txt", CD Y,M,D);
+  writePoints("P1.txt", CD P,M+1,N+1);
 
   if(Q0) printOptProcess("otw-r.bin",CD1 Q0,nlpr[0],M,D);
   if(Q1) printOptProcess("otw-a.bin",CD1 Q1,nlpr[1],M,D);
