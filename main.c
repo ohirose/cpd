@@ -32,37 +32,6 @@ o-----------------------------------------------------------------------------*/
 #include"util.h"
 #include"func.h"
 
-double ** readPoints(int *nr, int *nc, const char *file, const char mode){
-  int n,d,L,N,D,si,sd; FILE *fp; double **X,*b;
-  si=sizeof(int   );
-  sd=sizeof(double);
-
-  fp=fopen(file,"rb");if(!fp){printf("File not found: %s\n",file);exit(EXIT_FAILURE);}
-  fread(nr,si,1,fp);
-  fread(nc,si,1,fp); N=*nr;D=*nc;L=N*D;
-
-  if(N<D){
-    printf("The number of points in a point set is at least \n");
-    printf("the dimension of the vector space. Abort.       \n"); exit(1);
-  }
-
-  X=calloc2d(N,D);b=malloc(sd*L);fread(b,sd,L,fp);fclose(fp);
-  switch(mode){
-    case 'r': for(n=0;n<N;n++)for(d=0;d<D;d++) X[n][d]=b[d+n*D]; break;
-    case 'c': for(n=0;n<N;n++)for(d=0;d<D;d++) X[n][d]=b[n+d*N]; break;
-  } free(b);
-
-  return X;
-}
-
-int writePoints(const char *file, const double **X, const int N, const int D){
-  int n,d; FILE *fp=fopen(file,"w");if(!fp){printf("Can't open: %s\n",file);exit(EXIT_FAILURE);}
-  for(n=0;n<N;n++)for(d=0;d<D;d++)
-    fprintf(fp,"%lf%c",X[n][d],d==D-1?'\n':'\t');
-  fclose(fp);
-  return 0;
-}
-
 int scalePoints(double **X, const int N, const int D, const double *scale){
   int n,d; for(n=0;n<N;n++)for(d=0;d<D;d++) X[n][d]*=scale[d];
   return 0;
@@ -106,6 +75,7 @@ int main(int argc, char **argv){
   int M,N,D,nlp,nlpr[3]={0,0,0},size[3],flag=0,verb; double prms[6];
   double **W,**T,**G,**P,***C,*A,*B,**X,**Y,**Z,*Q0,*Q1,*Q2;
   double sgmX,sgmY,muX[3],muY[3],asp[3]={1,1,1},iasp[3]={1,1,1};
+  char mode,*fout,ftxt[32]="T.txt",fbin[32]="T.bin";
 
   if(argc!=4){
     printf("./cpd <mode> <X> <Y>\n\n");
@@ -123,8 +93,8 @@ int main(int argc, char **argv){
   verb =strchr(argv[1],(int)'i')!=NULL?1:0;
 
   readPrms(prms,"prms.txt");
-  X=readPoints(&N,&D,argv[2],'r');
-  Y=readPoints(&M,&D,argv[3],'r');
+  X=read2d(&N,&D,&mode,argv[2]);
+  Y=read2d(&M,&D,&mode,argv[3]);
   size[0]=M;size[1]=N;size[2]=D;nlp=prms[0];
 
   W = calloc2d(M,  D  ); A = calloc  (M*M,sizeof(double));
@@ -150,10 +120,8 @@ int main(int argc, char **argv){
   revertPoints(Y,muY,&sgmY,M,D); scalePoints(Y,M,D,iasp);
   revertPoints(X,muX,&sgmX,N,D); scalePoints(X,N,D,iasp);
 
-  writePoints("T1.txt", CD T,M,D);
-  writePoints("X1.txt", CD X,N,D);
-  writePoints("Y1.txt", CD Y,M,D);
-  writePoints("P1.txt", CD P,M+1,N+1);
+  fout=(mode=='t')?ftxt:fbin;
+  write2d(fout,CD T,M,D);
 
   if(Q0) printOptProcess("otw-r.bin",CD1 Q0,nlpr[0],M,D);
   if(Q1) printOptProcess("otw-a.bin",CD1 Q1,nlpr[1],M,D);

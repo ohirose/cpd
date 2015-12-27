@@ -35,5 +35,7 @@ double *** calloc3d (const int L, const int M, const int N);
 short   ** calloc2s (const int M, const int N);
 double     dist2    (const double x1[3], const double x2[3], const int D);
 
+double  ** read2d   (int *nr, int *nc, char *mode, const char *file);
+void       write2d  (const char *file, const double **X, const int nr, const int nc);
+
 #define SQ(x) ((x)*(x))
-int NUM; double *MEM;
