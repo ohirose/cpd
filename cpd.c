@@ -37,7 +37,7 @@ int cpd(double       **  W,        /*  M   x  D   | displacement matrix   */
         double       **  C,        /*  M   x  D   | Working wemory (2D)   */
         double       *   A,        /*  M   x  M   | Working wemory (1D)   */
         double       *   B,        /*  M   x  D   | Working wemory (1D)   */
-        double       *   Q,        /*  nlp x M x D| Working wemory (1D)   */
+        double       *   S,        /*  nlp x M x D| Working wemory (1D)   */
         const double **  X,        /*  N   x  D   | Point set 1 (Data)    */
         const double **  Y,        /*  N   x  D   | Point set 2 (Data)    */
         const int        size[3],  /*  M,  N, D   |                       */
@@ -58,7 +58,7 @@ int cpd(double       **  W,        /*  M   x  D   | displacement matrix   */
   for(m=0;m<M;m++)for(i=0;i<M;i++) G[m][i]=exp(-dist2(Y[m],Y[i],D)/(2*bet2));
 
   for(lp=0;lp<nlp;lp++){noise=(pow(2.0*M_PI*sgm2,0.5*D)*M*omg)/(N*(1-omg));
-    if(Q)for(m=0;m<M;m++)for(d=0;d<D;d++) Q[m+d*M+lp*M*D]=T[m][d];
+    if(S)for(m=0;m<M;m++)for(d=0;d<D;d++) S[m+d*M+lp*M*D]=T[m][d];
 
     /* compute P */
     for(n=0;n<=N;n++) P[M][n]=0;
@@ -87,7 +87,7 @@ int cpd(double       **  W,        /*  M   x  D   | displacement matrix   */
     sgm2/=P[M][N]*D;
 
     conv=log(pres2)-log(sgm2 );
-    if(verb) printf("loop=%d\tsgm2=%lf\tnoise=%lf\tconv=%lf\n",lp,sgm2,noise,conv);
+    if(verb) printf("loop=%d\tNp=%lf\tsgm2=%lf\tnoise=%lf\tconv=%lf\n",lp,P[M][N],sgm2,noise,conv);
     if(fabs(conv)<1e-8)break;
   }
 

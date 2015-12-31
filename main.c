@@ -61,19 +61,19 @@ int readPrms(double prms[5],const char *file){
   return 0;
 }
 
-int printOptProcess(const char *file, const double *Q, const int lp, const int M, const int D){
-  if(Q){FILE *fp=fopen(file,"wb");if(!fp){printf("Can't open: %s\n",file);exit(EXIT_FAILURE);}
+int printOptProcess(const char *file, const double *S, const int lp, const int M, const int D){
+  if(S){FILE *fp=fopen(file,"wb");if(!fp){printf("Can't open: %s\n",file);exit(EXIT_FAILURE);}
     fwrite(&M, sizeof(int),   1,     fp);
     fwrite(&D, sizeof(int),   1,     fp);
     fwrite(&lp,sizeof(int),   1,     fp);
-    fwrite(Q,  sizeof(double),lp*M*D,fp);
+    fwrite(S,  sizeof(double),lp*M*D,fp);
     fclose(fp);
   } return 0;
 }
 
 int main(int argc, char **argv){
   int M,N,D,nlp,nlpr[3]={0,0,0},size[3],flag=0,verb; double prms[6];
-  double **W,**T,**G,**P,***C,*A,*B,**X,**Y,**Z,*Q0,*Q1,*Q2;
+  double **W,**T,**G,**P,***C,*A,*B,**X,**Y,**Z,*S0,*S1,*S2;
   double sgmX,sgmY,muX[3],muY[3],asp[3]={1,1,1},iasp[3]={1,1,1};
   char mode,*fout,ftxt[32]="T.txt",fbin[32]="T.bin";
 
@@ -102,9 +102,9 @@ int main(int argc, char **argv){
   G = calloc2d(M,  M  ); C = calloc3d(4,N>M?N:M,D);
   P = calloc2d(M+1,N+1);
 
-  Q0=flag&1?malloc(nlp*M*D*sizeof(double)):NULL;
-  Q1=flag&2?malloc(nlp*M*D*sizeof(double)):NULL;
-  Q2=flag&4?malloc(nlp*M*D*sizeof(double)):NULL;
+  S0=flag&1?malloc(nlp*M*D*sizeof(double)):NULL;
+  S1=flag&2?malloc(nlp*M*D*sizeof(double)):NULL;
+  S2=flag&4?malloc(nlp*M*D*sizeof(double)):NULL;
 
   #define CD  (const double **)
   #define CD1 (const double * )
@@ -112,9 +112,9 @@ int main(int argc, char **argv){
   scalePoints(X,N,D,asp); normPoints(X,muX,&sgmX,N,D);
   scalePoints(Y,M,D,asp); normPoints(Y,muY,&sgmY,M,D);
 
-  if(flag&1) {nlpr[0]=rot   (W,T,P,C,Q0,CD X,CD Y,size,prms,verb); if(flag&6){Z=Y;Y=T;T=Z;}}
-  if(flag&2) {nlpr[1]=affine(W,T,P,C,Q1,CD X,CD Y,size,prms,verb); if(flag&4){Z=Y;Y=T;T=Z;}}
-  if(flag&4) {nlpr[2]=cpd   (W,T,G,P,C[0],A,B,Q2,CD X,CD Y,size,prms,verb);}
+  if(flag&1) {nlpr[0]=rot   (W,T,P,C,S0,CD X,CD Y,size,prms,verb); if(flag&6){Z=Y;Y=T;T=Z;}}
+  if(flag&2) {nlpr[1]=affine(W,T,P,C,S1,CD X,CD Y,size,prms,verb); if(flag&4){Z=Y;Y=T;T=Z;}}
+  if(flag&4) {nlpr[2]=cpd   (W,T,G,P,C[0],A,B,S2,CD X,CD Y,size,prms,verb);}
 
   revertPoints(T,muX,&sgmX,M,D); scalePoints(T,M,D,iasp);
   revertPoints(Y,muY,&sgmY,M,D); scalePoints(Y,M,D,iasp);
@@ -123,9 +123,9 @@ int main(int argc, char **argv){
   fout=(mode=='t')?ftxt:fbin;
   write2d(fout,CD T,M,D);
 
-  if(Q0) printOptProcess("otw-r.bin",CD1 Q0,nlpr[0],M,D);
-  if(Q1) printOptProcess("otw-a.bin",CD1 Q1,nlpr[1],M,D);
-  if(Q2) printOptProcess("otw-c.bin",CD1 Q2,nlpr[2],M,D);
+  if(S0) printOptProcess("otw-r.bin",CD1 S0,nlpr[0],M,D);
+  if(S1) printOptProcess("otw-a.bin",CD1 S1,nlpr[1],M,D);
+  if(S2) printOptProcess("otw-c.bin",CD1 S2,nlpr[2],M,D);
 
   return 0;
 }
