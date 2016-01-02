@@ -20,8 +20,8 @@
 
 /*-- NOTE --------------------------------------------------------------------o
 | Simple implementation of Coherent Point Drift, a method of point set        |
-| registration. This implementation uses "dposv" in Lapack for solving linear |
-| equations. Be careful when linking lapack library (dependent on OS).        |
+| registration. This implementation uses "dposv", "dsyev", and "dgesdd" in    |
+| Lapack. Be careful when linking lapack library (dependent on OS).           |
 o-----------------------------------------------------------------------------*/
 
 #include<stdio.h>
@@ -116,7 +116,7 @@ int main(int argc, char **argv){
 
   if(flag&1) {nlpr[0]=rot   (W,T,P,C,S0,CD X,CD Y,size,prms,verb); if(flag&6){Z=Y;Y=T;T=Z;}}
   if(flag&2) {nlpr[1]=affine(W,T,P,C,S1,CD X,CD Y,size,prms,verb); if(flag&4){Z=Y;Y=T;T=Z;}}
-  if(flag&4) {nlpr[2]=cpd   (W,T,G,P,U,V,A,B,S2,CD X,CD Y,size,prms,verb);}
+  if(flag&4) {nlpr[2]=cpd   (W,T,P,G,U,V,A,B,S2,CD X,CD Y,size,prms,verb);}
 
   revertPoints(T,muX,&sgmX,M,D); scalePoints(T,M,D,iasp);
   revertPoints(Y,muY,&sgmY,M,D); scalePoints(Y,M,D,iasp);
