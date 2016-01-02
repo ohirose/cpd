@@ -56,7 +56,8 @@ int readPrms(double prms[5],const char *file){
   fscanf(fp,"omg:%lf\n", prms+1);
   fscanf(fp,"bet:%lf\n", prms+2);
   fscanf(fp,"lmd:%lf\n", prms+3);
-  fscanf(fp,"dz:%lf\n",  prms+4);
+  fscanf(fp,"rnk:%lf\n", prms+4);
+  fscanf(fp,"dz:%lf\n",  prms+5);
   fclose(fp);
   return 0;
 }
@@ -72,9 +73,9 @@ int printOptProcess(const char *file, const double *S, const int lp, const int M
 }
 
 int main(int argc, char **argv){
-  int M,N,D,nlp,nlpr[3]={0,0,0},size[3],flag=0,verb; double prms[6];
-  double **W,**T,**G,**P,***C,*A,*B,**X,**Y,**Z,*S0,*S1,*S2;
-  double sgmX,sgmY,muX[3],muY[3],asp[3]={1,1,1},iasp[3]={1,1,1};
+  int K,M,N,D,nlp,nlpr[3]={0,0,0},size[3],flag=0,verb; double prms[6];
+  double **W,**T,**G,**P,***C,***U,***V,*A,*B,**X,**Y,**Z,*S0,*S1,*S2;
+  double dz,sgmX,sgmY,muX[3],muY[3],asp[3]={1,1,1},iasp[3]={1,1,1};
   char mode,*fout,ftxt[32]="T.txt",fbin[32]="T.bin";
 
   if(argc!=4){
@@ -95,11 +96,12 @@ int main(int argc, char **argv){
   readPrms(prms,"prms.txt");
   X=read2d(&N,&D,&mode,argv[2]);
   Y=read2d(&M,&D,&mode,argv[3]);
-  size[0]=M;size[1]=N;size[2]=D;nlp=prms[0];
+  size[0]=M;size[1]=N;size[2]=D;nlp=prms[0];K=prms[4];dz=prms[5];
 
   W = calloc2d(M,  D  ); A = calloc  (M*M,sizeof(double));
-  T = calloc2d(M,  D  ); B = calloc  (M*D,sizeof(double));
+  T = calloc2d(M,  D  ); B = calloc  (M*M,sizeof(double));
   G = calloc2d(M,  M  ); C = calloc3d(4,N>M?N:M,D);
+  U = calloc3d(2,K+1,M); V = calloc3d(2,M,D);
   P = calloc2d(M+1,N+1);
 
   S0=flag&1?malloc(nlp*M*D*sizeof(double)):NULL;
@@ -108,13 +110,13 @@ int main(int argc, char **argv){
 
   #define CD  (const double **)
   #define CD1 (const double * )
-  if(D==3) {asp[2]=prms[4];iasp[2]=1.0/prms[4];}
+  if(D==3) {asp[2]=dz;iasp[2]=1.0/dz;}
   scalePoints(X,N,D,asp); normPoints(X,muX,&sgmX,N,D);
   scalePoints(Y,M,D,asp); normPoints(Y,muY,&sgmY,M,D);
 
   if(flag&1) {nlpr[0]=rot   (W,T,P,C,S0,CD X,CD Y,size,prms,verb); if(flag&6){Z=Y;Y=T;T=Z;}}
   if(flag&2) {nlpr[1]=affine(W,T,P,C,S1,CD X,CD Y,size,prms,verb); if(flag&4){Z=Y;Y=T;T=Z;}}
-  if(flag&4) {nlpr[2]=cpd   (W,T,G,P,C[0],A,B,S2,CD X,CD Y,size,prms,verb);}
+  if(flag&4) {nlpr[2]=cpd   (W,T,G,P,U,V,A,B,S2,CD X,CD Y,size,prms,verb);}
 
   revertPoints(T,muX,&sgmX,M,D); scalePoints(T,M,D,iasp);
   revertPoints(Y,muY,&sgmY,M,D); scalePoints(Y,M,D,iasp);

@@ -2,4 +2,5 @@ nlp:1000
 omg:0.9
 bet:1.2
 lmd:3.0
+rnk:0
 dz:3.0
