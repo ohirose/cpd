@@ -102,7 +102,7 @@ int rot(double       **  W,        /*  D+1 x  D          | Linear map           
 
     /* check convergence */
     conv=log(pres2)-log(sgm2 );
-    if(verb) printf("loop=%d\tsgm2=%lf\tnoise=%lf\tconv=%lf\n",lp,sgm2,noise,conv);
+    if(verb) printInfo('r',lp,P[M][N],sgm2,noise,conv);
     if(fabs(conv)<1e-8)break;
   }
 

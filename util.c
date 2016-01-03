@@ -160,3 +160,15 @@ double ** read2d(int *nr, int *nc, char *mode, const char *file){
   err06: printf("File '%s' may not be neither tab-",             file);
          printf("delimited file nor binary file. Abort.  \n");          exit(EXIT_FAILURE);
 }
+
+void printInfo(const char mode, const int loop, const double Np, const double sgm2, const double noise, const double conv){
+  char *r="Rigid",*a="Affine",*c="CPD";
+  if(loop) printf("\033[F\033[J\033[F\033[J\033[F\033[J\033[F\033[J\033[F\033[J\033[F\033[J");
+  printf("  %s: %d loops\n",mode=='r'?r:(mode=='a'?a:c),loop);
+  //printf("    loop:  %d \n",  loop);
+  printf("    Np:    %lf\n",  Np);
+  printf("    sgm2:  %lf\n",  sgm2);
+  printf("    noise: %lf\n",  noise);
+  printf("    conv:  %lf\n\n",conv);
+  return;
+}

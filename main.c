@@ -115,6 +115,35 @@ int main(int argc, char **argv){
   X=read2d(&N,&D,&mode,argv[2]);
   Y=read2d(&M,&D,&mode,argv[3]);
   size[0]=M;size[1]=N;size[2]=D;nlp=prms[0];K=prms[4];dz=prms[5];
+  fout=(mode=='t')?ftxt:fbin;
+
+  if(verb){
+    printf("--------------- SUMMARY ---------------------------------------------\n");
+    printf("\n");
+    printf("  Input Data:\n");
+    printf("    Point set 1 (reference): [%s]\n", argv[2]);
+    printf("    Point set 2 (floating):  [%s]\n", argv[3]);
+    printf("    Size of point set 1: [%3d,%2d]\n", M,D);
+    printf("    Size of point set 2: [%3d,%2d]\n", N,D); printf("\n");
+    printf("  Deformation Model:\n    [");
+    if(flag&1) printf("rigid" ); if(flag&1&&(flag&2||flag&4)) printf("+");
+    if(flag&2) printf("affine"); if(flag&2&&(flag&4))         printf("+");
+    if(flag&4) printf("cpd"   ); printf("]\n\n");
+    printf("  Parameters: ");if(strlen(fprm))printf("%s",fprm); printf("\n");
+    printf("    nloop  = %d\n", (int) prms[0]);
+    printf("    omega  = %lf\n",      prms[1]);
+    printf("    lambda = %lf\n",      prms[2]);
+    printf("    beta   = %lf\n",      prms[3]);
+    if(K)    printf("    rank   = %d\n", (int) prms[4]);
+    if(D==3) printf("    zscale = %lf\n",prms[5]);
+    if(strlen(fprm)){printf("\n");
+      printf("  ** Parameters specified by %s were used, that is,\n", fprm);
+      printf("  those specified by command-line arguments are disabled.\n");
+    }
+    printf("\n");
+    printf("  Output: \n");
+    printf("    [%s]\n\n",fout);
+  }
 
   W = calloc2d(M,  D  ); A = calloc  (M*M,sizeof(double));
   T = calloc2d(M,  D  ); B = calloc  (M*M,sizeof(double));
@@ -140,41 +169,13 @@ int main(int argc, char **argv){
   revertPoints(Y,muY,&sgmY,M,D); scalePoints(Y,M,D,iasp);
   revertPoints(X,muX,&sgmX,N,D); scalePoints(X,N,D,iasp);
 
-  fout=(mode=='t')?ftxt:fbin;
   write2d(fout,CD T,M,D);
 
   if(S0) printOptProcess("otw-r.bin",CD1 S0,nlpr[0],M,D);
   if(S1) printOptProcess("otw-a.bin",CD1 S1,nlpr[1],M,D);
   if(S2) printOptProcess("otw-c.bin",CD1 S2,nlpr[2],M,D);
 
-  if(verb){
-    printf("\n");
-    printf("--------------- SUMMARY ---------------------------------------------\n");
-    printf("  Input Data:\n");
-    printf("    Point set 1 (reference): [%s]\n", argv[2]);
-    printf("    Point set 2 (floating):  [%s]\n", argv[3]);
-    printf("    Size of point set 1: [%3d,%2d]\n", M,D);
-    printf("    Size of point set 2: [%3d,%2d]\n", N,D); printf("\n");
-    printf("  Deformation Mode:\n    [");
-    if(flag&1) printf("rigid" ); if(flag&1&&(flag&2||flag&4)) printf("+");
-    if(flag&2) printf("affine"); if(flag&2&&(flag&4))         printf("+");
-    if(flag&4) printf("cpd"   ); printf("]\n\n");
-    printf("  Parameters: ");if(strlen(fprm))printf("%s",fprm); printf("\n");
-    printf("    nloop  = %d\n", (int) prms[0]);
-    printf("    omega  = %lf\n",      prms[1]);
-    printf("    lambda = %lf\n",      prms[2]);
-    printf("    beta   = %lf\n",      prms[3]);
-    if(K)    printf("    rank   = %d\n", (int) prms[4]);
-    if(D==3) printf("    zscale = %lf\n",prms[5]);
-    if(strlen(fprm)){printf("\n");
-      printf("  ** Parameters specified by %s were used, that is,\n", fprm);
-      printf("  those specified by command-line arguments are disabled.\n");
-    }
-    printf("\n");
-    printf("  Output:\n");
-    printf("    [%s]\n",fout);
-    printf("---------------------------------------------------------------------\n");
-  }
+  if(verb) printf("---------------------------------------------------------------------\n");
 
   return 0;
 }

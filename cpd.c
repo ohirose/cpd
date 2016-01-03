@@ -105,7 +105,7 @@ int cpd(double       **  W,        /*  M   x   D     | Displacement matrix      
 
     /* check convergence */
     conv=log(pres2)-log(sgm2 );
-    if(verb) printf("loop=%d\tNp=%lf\tsgm2=%lf\tnoise=%lf\tconv=%lf\n",lp,P[M][N],sgm2,noise,conv);
+    if(verb) printInfo('c',lp,P[M][N],sgm2,noise,conv);
     if(fabs(conv)<1e-8)break;
   }
 
