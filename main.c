@@ -29,6 +29,7 @@ o-----------------------------------------------------------------------------*/
 #include<assert.h>
 #include<string.h>
 #include<math.h>
+#include<unistd.h>
 #include"util.h"
 #include"func.h"
 
@@ -73,17 +74,21 @@ int printOptProcess(const char *file, const double *S, const int lp, const int M
 }
 
 int main(int argc, char **argv){
-  int K,M,N,D,nlp,nlpr[3]={0,0,0},size[3],flag=0,verb; double prms[6];
+  int K,M,N,D,nlp,nlpr[3]={0,0,0},size[3],flag=0,verb,optc;
   double **W,**T,**G,**P,***C,***U,***V,*A,*B,**X,**Y,**Z,*S0,*S1,*S2;
   double dz,sgmX,sgmY,muX[3],muY[3],asp[3]={1,1,1},iasp[3]={1,1,1};
-  char mode,*fout,ftxt[32]="T.txt",fbin[32]="T.bin";
+  char mode,opt,**optp,*fout,ftxt[32]="T.txt",fbin[32]="T.bin",fprm[32]="";
+  double prms[6]={1000,0.1,1.0,1.0,0,1.0};/*default: nloop,omega,lambda,beta,rank,zscale*/
 
-  if(argc!=4){
-    printf("./cpd <mode> <X> <Y>\n\n");
-    printf("NOTE: At least one of characters r, a, and c must be included in <mode>.       \n");
-    printf("Optionally, m and i can be attatched to <mode> which specifies a print option. \n");
-    printf("r: rotate, a: affine, c: cpd, i: information, m: memorize optimization process.\n");
+  if(argc<4){
     printf("\n");
+    printf("  USAGE: ./cpd <mode> <X> <Y> (+options) \n\n");
+    printf("  MODE: At least one of characters r, a, and c must be included in <mode>.           \n");
+    printf("  Optionally, m and i which specify print options can be attatched to <mode>.        \n");
+    printf("  r: rotate, a: affine, c: cpd, i: information, m: memorize optimization process.  \n\n");
+    printf("  OPTIONs: options must be added AFTER the arguments.                                \n");
+    printf("  -n: nloop, -w omega, -l lambda, -b beta, -r rank, -z zscale, -p <parameter file>.\n\n");
+    printf("  EXAMPLE: ./cpd raci X.txt Y.txt -w 0.5 -l 15 -b 0.9 -z 3.5 -n 2000               \n\n");
     exit(1);
   }
 
@@ -93,7 +98,20 @@ int main(int argc, char **argv){
   flag+=strchr(argv[1],(int)'m')!=NULL?8:0;
   verb =strchr(argv[1],(int)'i')!=NULL?1:0;
 
-  readPrms(prms,"prms.txt");
+  optp=argv+3; optc=argc-3;
+  while((opt=getopt(optc,optp,"n:w:l:b:r:z:p:"))!=-1){
+    switch(opt){
+      case 'n': prms[0]=atof(optarg);  break;
+      case 'w': prms[1]=atof(optarg);  break;
+      case 'l': prms[2]=atof(optarg);  break;
+      case 'b': prms[3]=atof(optarg);  break;
+      case 'r': prms[4]=atof(optarg);  break;
+      case 'z': prms[5]=atof(optarg);  break;
+      case 'p': strcpy (fprm,optarg);  break;
+      default : exit(EXIT_FAILURE);
+    }
+  } if(strlen(fprm)) readPrms(prms,fprm);
+
   X=read2d(&N,&D,&mode,argv[2]);
   Y=read2d(&M,&D,&mode,argv[3]);
   size[0]=M;size[1]=N;size[2]=D;nlp=prms[0];K=prms[4];dz=prms[5];
@@ -128,6 +146,35 @@ int main(int argc, char **argv){
   if(S0) printOptProcess("otw-r.bin",CD1 S0,nlpr[0],M,D);
   if(S1) printOptProcess("otw-a.bin",CD1 S1,nlpr[1],M,D);
   if(S2) printOptProcess("otw-c.bin",CD1 S2,nlpr[2],M,D);
+
+  if(verb){
+    printf("\n");
+    printf("--------------- SUMMARY ---------------------------------------------\n");
+    printf("  Input Data:\n");
+    printf("    Point set 1 (reference): [%s]\n", argv[2]);
+    printf("    Point set 2 (floating):  [%s]\n", argv[3]);
+    printf("    Size of point set 1: [%3d,%2d]\n", M,D);
+    printf("    Size of point set 2: [%3d,%2d]\n", N,D); printf("\n");
+    printf("  Deformation Mode:\n    [");
+    if(flag&1) printf("rigid" ); if(flag&1&&(flag&2||flag&4)) printf("+");
+    if(flag&2) printf("affine"); if(flag&2&&(flag&4))         printf("+");
+    if(flag&4) printf("cpd"   ); printf("]\n\n");
+    printf("  Parameters: ");if(strlen(fprm))printf("%s",fprm); printf("\n");
+    printf("    nloop  = %d\n", (int) prms[0]);
+    printf("    omega  = %lf\n",      prms[1]);
+    printf("    lambda = %lf\n",      prms[2]);
+    printf("    beta   = %lf\n",      prms[3]);
+    if(K)    printf("    rank   = %d\n", (int) prms[4]);
+    if(D==3) printf("    zscale = %lf\n",prms[5]);
+    if(strlen(fprm)){printf("\n");
+      printf("  ** Parameters specified by %s were used, that is,\n", fprm);
+      printf("  those specified by command-line arguments are disabled.\n");
+    }
+    printf("\n");
+    printf("  Output:\n");
+    printf("    [%s]\n",fout);
+    printf("---------------------------------------------------------------------\n");
+  }
 
   return 0;
 }
