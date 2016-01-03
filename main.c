@@ -51,7 +51,7 @@ int revertPoints(double **X, double *mu, double *sgm, const int N, const int D){
   return 0;
 }
 
-int readPrms(double prms[5],const char *file){
+int readPrms(double prms[6],const char *file){
   FILE* fp=fopen(file,"r");if(!fp){printf("File not found: %s\n",file);exit(EXIT_FAILURE);}
   fscanf(fp,"nlp:%lf\n", prms+0);
   fscanf(fp,"omg:%lf\n", prms+1);
@@ -60,6 +60,17 @@ int readPrms(double prms[5],const char *file){
   fscanf(fp,"rnk:%lf\n", prms+4);
   fscanf(fp,"dz:%lf\n",  prms+5);
   fclose(fp);
+  return 0;
+}
+
+int checkPrms(double prms[6]){ int nlp,K; double omg,lmd,bet,dz;
+  nlp=prms[0];omg=prms[1];lmd=prms[2];bet=prms[3];K=prms[4];dz=prms[5];
+  if(!(nlp>0))       {printf("-n: Argument must be a positive integer. Abort.\n");        exit(EXIT_FAILURE);}
+  if(!(omg>0&&omg<1)){printf("-w: Argument must range (0,1). Abort.\n");                  exit(EXIT_FAILURE);}
+  if(!(lmd>0))       {printf("-l: Argument must be positive. Abort.\n");                  exit(EXIT_FAILURE);}
+  if(!(bet>0))       {printf("-b: Argument must be positive. Abort.\n");                  exit(EXIT_FAILURE);}
+  if(!(dz >0))       {printf("-z: Argument must be positive. Abort.\n");                  exit(EXIT_FAILURE);}
+  if(!(K >=0))       {printf("-r: Argument must be a positive integer or zero. Abort.\n");exit(EXIT_FAILURE);}
   return 0;
 }
 
@@ -110,7 +121,7 @@ int main(int argc, char **argv){
       case 'p': strcpy (fprm,optarg);  break;
       default : exit(EXIT_FAILURE);
     }
-  } if(strlen(fprm)) readPrms(prms,fprm);
+  } if(strlen(fprm)) readPrms(prms,fprm); checkPrms(prms);
 
   X=read2d(&N,&D,&mode,argv[2]);
   Y=read2d(&M,&D,&mode,argv[3]);
