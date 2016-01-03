@@ -88,7 +88,7 @@ int affine(double       **  W,        /*  D+1 x  D          | Linear map        
 
     /* check convergence */
     conv=log(pres2)-log(sgm2 );
-    if(verb) printInfo('a',lp,P[M][N],sgm2,noise,conv);
+    if(verb) printInfo('a',lp,P[M][N],sqrt(sgm2),noise,conv);
     if(fabs(conv)<1e-8)break;
   }
 

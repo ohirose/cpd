@@ -129,7 +129,6 @@ int main(int argc, char **argv){
   fout=(mode=='t')?ftxt:fbin;
 
   if(verb){
-    printf("--------------- SUMMARY ---------------------------------------------\n");
     printf("\n");
     printf("  Input Data:\n");
     printf("    Point set 1 (reference): [%s]\n", argv[2]);
@@ -185,8 +184,6 @@ int main(int argc, char **argv){
   if(S0) printOptProcess("otw-r.bin",CD1 S0,nlpr[0],M,D);
   if(S1) printOptProcess("otw-a.bin",CD1 S1,nlpr[1],M,D);
   if(S2) printOptProcess("otw-c.bin",CD1 S2,nlpr[2],M,D);
-
-  if(verb) printf("---------------------------------------------------------------------\n");
 
   return 0;
 }

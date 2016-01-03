@@ -38,6 +38,6 @@ double     dist2    (const double x1[3], const double x2[3], const int D);
 double  ** read2d   (int *nr, int *nc, char *mode, const char *file);
 void       write2d  (const char *file, const double **X, const int nr, const int nc);
 
-void printInfo(const char mode, const int loop, const double Np, const double sgm2, const double noise, const double conv);
+void printInfo(const char mode, const int loop, const double Np, const double sigma, const double noise, const double conv);
 
 #define SQ(x) ((x)*(x))
