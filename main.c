@@ -52,18 +52,6 @@ int revertPoints(double **X, double *mu, double *sgm, const int N, const int D){
   return 0;
 }
 
-//int readPrms(double prms[6],const char *file){
-//  FILE* fp=fopen(file,"r");if(!fp){printf("File not found: %s\n",file);exit(EXIT_FAILURE);}
-//  fscanf(fp,"nlp:%lf\n", prms+0);
-//  fscanf(fp,"omg:%lf\n", prms+1);
-//  fscanf(fp,"bet:%lf\n", prms+2);
-//  fscanf(fp,"lmd:%lf\n", prms+3);
-//  fscanf(fp,"rnk:%lf\n", prms+4);
-//  fscanf(fp,"dz:%lf\n",  prms+5);
-//  fclose(fp);
-//  return 0;
-//}
-
 void readPrms(double prms[6],const char *file){
   int i,l,L,N=6; FILE *fp; char *s, line[1024],*names[]={"nloop","omega","lambda","beta","rank","zscale"};
 
