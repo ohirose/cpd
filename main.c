@@ -92,8 +92,8 @@ void printUsage(void){
   printf("  MODE: At least one of characters r, a, and c must be included in <mode>.           \n");
   printf("  Optionally, m and i which specify print options can be attatched.                  \n");
   printf("  r: rotate, a: affine, c: cpd, i: information, m: memorize optimization process.  \n\n");
-  printf("  OPTIONs: Options must be added AFTER the arguments. If the parameter file is set,  \n");
-  printf("  by the argument of '-p', other parameters specified by options are ignored.        \n");
+  printf("  OPTIONs: Options must be added AFTER the arguments. If the parameter file is set   \n");
+  printf("  as the argument of '-p', other parameters specified by options are ignored.        \n");
   printf("  -n: nloop, -w omega, -l lambda, -b beta, -r rank, -z zscale, -p <parameter file>.\n\n");
   printf("  EXAMPLE: ./cpd raci X.txt Y.txt -w 0.5 -l 15 -b 0.9 -z 3.5 -n 2000               \n\n");
   exit(EXIT_SUCCESS); return;
