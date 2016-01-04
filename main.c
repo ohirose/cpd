@@ -30,6 +30,7 @@ o-----------------------------------------------------------------------------*/
 #include<string.h>
 #include<math.h>
 #include<unistd.h>
+#include<ctype.h>
 #include"util.h"
 #include"func.h"
 
@@ -51,16 +52,29 @@ int revertPoints(double **X, double *mu, double *sgm, const int N, const int D){
   return 0;
 }
 
-int readPrms(double prms[6],const char *file){
-  FILE* fp=fopen(file,"r");if(!fp){printf("File not found: %s\n",file);exit(EXIT_FAILURE);}
-  fscanf(fp,"nlp:%lf\n", prms+0);
-  fscanf(fp,"omg:%lf\n", prms+1);
-  fscanf(fp,"bet:%lf\n", prms+2);
-  fscanf(fp,"lmd:%lf\n", prms+3);
-  fscanf(fp,"rnk:%lf\n", prms+4);
-  fscanf(fp,"dz:%lf\n",  prms+5);
-  fclose(fp);
-  return 0;
+//int readPrms(double prms[6],const char *file){
+//  FILE* fp=fopen(file,"r");if(!fp){printf("File not found: %s\n",file);exit(EXIT_FAILURE);}
+//  fscanf(fp,"nlp:%lf\n", prms+0);
+//  fscanf(fp,"omg:%lf\n", prms+1);
+//  fscanf(fp,"bet:%lf\n", prms+2);
+//  fscanf(fp,"lmd:%lf\n", prms+3);
+//  fscanf(fp,"rnk:%lf\n", prms+4);
+//  fscanf(fp,"dz:%lf\n",  prms+5);
+//  fclose(fp);
+//  return 0;
+//}
+
+void readPrms(double prms[6],const char *file){
+  int i,l,L,N=6; FILE *fp; char *s, line[1024],*names[]={"nloop","omega","lambda","beta","rank","zscale"};
+
+  fp=fopen(file,"r");if(!fp){printf("File not found: %s\n",file);exit(EXIT_FAILURE);}
+  while(fgets(line,1024,fp)){
+    if(line[0]=='#') continue; L=strlen(line);
+    for(l=0;l<L;l++) line[l]=tolower(line[l]);
+    for(i=0;i<N;i++){s=names[i];if(strstr(line,s))sscanf(line+strlen(s),"%lf\n",&prms[i]);}
+  } fclose(fp);
+
+  return;
 }
 
 int checkPrms(double prms[6]){ int nlp,K; double omg,lmd,bet,dz;
@@ -84,6 +98,30 @@ int printOptProcess(const char *file, const double *S, const int lp, const int M
   } return 0;
 }
 
+void printUsage(void){
+  printf("\n");
+  printf("  USAGE: ./cpd <mode> <X> <Y> (+ options) \n\n");
+  printf("  MODE: At least one of characters r, a, and c must be included in <mode>.           \n");
+  printf("  Optionally, m and i which specify print options can be attatched.                  \n");
+  printf("  r: rotate, a: affine, c: cpd, i: information, m: memorize optimization process.  \n\n");
+  printf("  OPTIONs: Options must be added AFTER the arguments. If the parameter file is set,  \n");
+  printf("  by the argument of '-p', other parameters specified by options are ignored.        \n");
+  printf("  -n: nloop, -w omega, -l lambda, -b beta, -r rank, -z zscale, -p <parameter file>.\n\n");
+  printf("  EXAMPLE: ./cpd raci X.txt Y.txt -w 0.5 -l 15 -b 0.9 -z 3.5 -n 2000               \n\n");
+  exit(EXIT_SUCCESS); return;
+}
+
+void printVersion(void){
+  printf("\n");
+  printf(" cpd version 0.1.0 (Jan/04/2016).   \n");
+  printf(" Copyright (c) Osamu Hirose       \n\n");
+  printf(" This software is an implementation of the point-set registration algorithm known as   \n");
+  printf(" Coherent Point Drift (CPD) invented by Andriy Myronenko and Xubo Song (2010).         \n");
+  printf(" Algorithm details are available in their article \"Point Set Registration: Coherent   \n");
+  printf(" Point Drift, IEEE TPAMI, 32(12), 2262--2275, 2010.                                  \n\n");
+  exit(EXIT_SUCCESS); return;
+}
+
 int main(int argc, char **argv){
   int K,M,N,D,nlp,nlpr[3]={0,0,0},size[3],flag=0,verb,optc;
   double **W,**T,**G,**P,***C,***U,***V,*A,*B,**X,**Y,**Z,*S0,*S1,*S2;
@@ -91,17 +129,8 @@ int main(int argc, char **argv){
   char mode,opt,**optp,*fout,ftxt[32]="T.txt",fbin[32]="T.bin",fprm[32]="";
   double prms[6]={1000,0.1,1.0,1.0,0,1.0};/*default: nloop,omega,lambda,beta,rank,zscale*/
 
-  if(argc<4){
-    printf("\n");
-    printf("  USAGE: ./cpd <mode> <X> <Y> (+options) \n\n");
-    printf("  MODE: At least one of characters r, a, and c must be included in <mode>.           \n");
-    printf("  Optionally, m and i which specify print options can be attatched to <mode>.        \n");
-    printf("  r: rotate, a: affine, c: cpd, i: information, m: memorize optimization process.  \n\n");
-    printf("  OPTIONs: options must be added AFTER the arguments.                                \n");
-    printf("  -n: nloop, -w omega, -l lambda, -b beta, -r rank, -z zscale, -p <parameter file>.\n\n");
-    printf("  EXAMPLE: ./cpd raci X.txt Y.txt -w 0.5 -l 15 -b 0.9 -z 3.5 -n 2000               \n\n");
-    exit(1);
-  }
+  if      (argc==2) printVersion();
+  else if (argc <4) printUsage  ();
 
   flag+=strchr(argv[1],(int)'r')!=NULL?1:0;
   flag+=strchr(argv[1],(int)'a')!=NULL?2:0;
@@ -110,7 +139,7 @@ int main(int argc, char **argv){
   verb =strchr(argv[1],(int)'i')!=NULL?1:0;
 
   optp=argv+3; optc=argc-3;
-  while((opt=getopt(optc,optp,"n:w:l:b:r:z:p:"))!=-1){
+  while((opt=getopt(optc,optp,"n:w:l:b:r:z:p:v"))!=-1){
     switch(opt){
       case 'n': prms[0]=atof(optarg);  break;
       case 'w': prms[1]=atof(optarg);  break;
@@ -119,6 +148,7 @@ int main(int argc, char **argv){
       case 'r': prms[4]=atof(optarg);  break;
       case 'z': prms[5]=atof(optarg);  break;
       case 'p': strcpy (fprm,optarg);  break;
+      case 'v': printVersion();        break;
       default : exit(EXIT_FAILURE);
     }
   } if(strlen(fprm)) readPrms(prms,fprm); checkPrms(prms);

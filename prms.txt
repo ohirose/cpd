@@ -1,6 +1,45 @@
-nlp:1000
-omg:0.9
-bet:1.2
-lmd:3.0
-rnk:0
-dz:3.0
+nloop	3000
+omega	0.2
+lambda	0.9
+beta	0.5
+zscale	3.5
+rank	20
+
+#--------------------------------------------------------------------o 
+#               CPD parameter file                                   |
+#--------------------------------------------------------------------o
+#  CPD reads this file when spefied by the argument of '-p' option.  |
+#  For each line, a parameter and the corresponding value MUST be    | 
+#  separated by white spaces (',' and ":" are not allowed).          |
+#                                                                    |
+#  If the option '-p' is active, parameters specified by the other   |
+#  options are disabled and default values are used for parameters   |
+#  which are not specified in this file. Admissible parameters are:  |
+#                                                                    | 
+#     nloop: (1000)                                                  | 
+#       Upper bound number of loops for convergence,                 |
+#       positive integer.                                            |
+#                                                                    |
+#     omega: (0.1)                                                   |
+#       Noise probability, 0 < omega < 1, greater is more noisy.     |
+#                                                                    |
+#     lambda: (1.0)                                                  |
+#       Smoothness of transformation, positive, greater is           |
+#       smoother.                                                    |
+#                                                                    |
+#     beta: (1.0)                                                    |
+#       Range for local averaging of velocity field, positive,       |
+#       greater is broader.                                          |
+#                                                                    |
+#     rank: (0)                                                      |
+#       Low-rank approximation of the Gram matrix, positive          |
+#       integer, no approximation if specified as 0.                 |
+#                                                                    |
+#     zscale: (1.0)                                                  |
+#       Pixel aspect ratio of z-axis to xy-plane allowed only for    |
+#       3D space, positive.                                          |
+#                                                                    |
+#  *Parentheses after parameter names represent default values.      | 
+#                                                                    |
+#--------------------------------------------------------------------o
+
