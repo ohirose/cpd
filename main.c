@@ -90,12 +90,12 @@ void printUsage(void){
   printf("\n");
   printf("  USAGE: ./cpd <mode> <X> <Y> (+ options) \n\n");
   printf("  MODE: At least one of characters r, a, and c must be included in <mode>.           \n");
-  printf("  Optionally, m and i which specify print options can be attatched.                  \n");
-  printf("  r: rotate, a: affine, c: cpd, i: information, m: memorize optimization process.  \n\n");
+  printf("  Optionally, m and q which specify print options can be attatched.                  \n");
+  printf("  r: rigid, a: affine, c: cpd, q: quiet, m: memorize optimization process.         \n\n");
   printf("  OPTIONs: Options must be added AFTER the arguments. If the parameter file is set   \n");
   printf("  as the argument of '-p', other parameters specified by options are ignored.        \n");
   printf("  -n: nloop, -w omega, -l lambda, -b beta, -r rank, -z zscale, -p <parameter file>.\n\n");
-  printf("  EXAMPLE: ./cpd raci X.txt Y.txt -w 0.5 -l 15 -b 0.9 -z 3.5 -n 2000               \n\n");
+  printf("  EXAMPLE: ./cpd rac X.txt Y.txt -w 0.5 -l 2.0 -b 0.9 -z 3.5 -n 2000                \n\n");
   exit(EXIT_SUCCESS); return;
 }
 
@@ -124,7 +124,7 @@ int main(int argc, char **argv){
   flag+=strchr(argv[1],(int)'a')!=NULL?2:0;
   flag+=strchr(argv[1],(int)'c')!=NULL?4:0;
   flag+=strchr(argv[1],(int)'m')!=NULL?8:0;
-  verb =strchr(argv[1],(int)'i')!=NULL?1:0;
+  verb =strchr(argv[1],(int)'q')!=NULL?0:1;
 
   optp=argv+3; optc=argc-3;
   while((opt=getopt(optc,optp,"n:w:l:b:r:z:p:v"))!=-1){
