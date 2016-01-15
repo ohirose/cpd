@@ -23,6 +23,7 @@
 #include<math.h>
 #include"util.h"
 #include"lpk.h"
+#include"info.h"
 
 int cpd(double       **  W,        /*  M   x   D     | Displacement matrix      */
         double       **  T,        /*  M   x   D     | Transformed point set    */
@@ -105,7 +106,7 @@ int cpd(double       **  W,        /*  M   x   D     | Displacement matrix      
 
     /* check convergence */
     conv=log(pres2)-log(sgm2 );
-    if(verb) printInfo('c',lp,P[M][N],sqrt(sgm2),noise,conv);
+    if(verb) printOptIndex('c',lp,P[M][N],sqrt(sgm2),noise,conv);
     if(fabs(conv)<1e-8)break;
   }
 

@@ -23,6 +23,7 @@
 #include<math.h>
 #include"util.h"
 #include"lpk.h"
+#include"info.h"
 #define WSIZE 100
 
 double det(const double *A, const int D){
@@ -102,7 +103,7 @@ int rot(double       **  W,        /*  D+1 x  D          | Linear map           
 
     /* check convergence */
     conv=log(pres2)-log(sgm2 );
-    if(verb) printInfo('r',lp,P[M][N],sqrt(sgm2),noise,conv);
+    if(verb) printOptIndex('r',lp,P[M][N],sqrt(sgm2),noise,conv);
     if(fabs(conv)<1e-8)break;
   }
 

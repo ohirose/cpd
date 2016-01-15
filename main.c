@@ -33,6 +33,7 @@ o-----------------------------------------------------------------------------*/
 #include<ctype.h>
 #include"util.h"
 #include"func.h"
+#include"info.h"
 
 int scalePoints(double **X, const int N, const int D, const double *scale){
   int n,d; for(n=0;n<N;n++)for(d=0;d<D;d++) X[n][d]*=scale[d];
@@ -76,45 +77,11 @@ int checkPrms(double prms[6]){ int nlp,K; double omg,lmd,bet,dz;
   return 0;
 }
 
-int printOptProcess(const char *file, const double *S, const int lp, const int M, const int D){
-  if(S){FILE *fp=fopen(file,"wb");if(!fp){printf("Can't open: %s\n",file);exit(EXIT_FAILURE);}
-    fwrite(&M, sizeof(int),   1,     fp);
-    fwrite(&D, sizeof(int),   1,     fp);
-    fwrite(&lp,sizeof(int),   1,     fp);
-    fwrite(S,  sizeof(double),lp*M*D,fp);
-    fclose(fp);
-  } return 0;
-}
-
-void printUsage(void){
-  printf("\n");
-  printf("  USAGE: ./cpd <mode> <X> <Y> (+ options) \n\n");
-  printf("  MODE: At least one of characters r, a, and c must be included in <mode>.           \n");
-  printf("  Optionally, m and q which specify print options can be attatched.                  \n");
-  printf("  r: rigid, a: affine, c: cpd, q: quiet, m: memorize optimization process.         \n\n");
-  printf("  OPTIONs: Options must be added AFTER the arguments. If the parameter file is set   \n");
-  printf("  as the argument of '-p', other parameters specified by options are ignored.        \n");
-  printf("  -n: nloop, -w omega, -l lambda, -b beta, -r rank, -z zscale, -p <parameter file>.\n\n");
-  printf("  EXAMPLE: ./cpd rac X.txt Y.txt -w 0.5 -l 2.0 -b 0.9 -z 3.5 -n 2000 -r 20         \n\n");
-  exit(EXIT_SUCCESS); return;
-}
-
-void printVersion(void){
-  printf("\n");
-  printf(" cpd version 0.1.0 (Jan/04/2016).   \n");
-  printf(" Copyright (c) Osamu Hirose       \n\n");
-  printf(" This software is an implementation of the point-set registration algorithm known as   \n");
-  printf(" Coherent Point Drift (CPD) invented by Andriy Myronenko and Xubo Song (2010).         \n");
-  printf(" Algorithm details are available in their article \"Point Set Registration: Coherent   \n");
-  printf(" Point Drift, IEEE TPAMI, 32(12), 2262--2275, 2010.                                  \n\n");
-  exit(EXIT_SUCCESS); return;
-}
-
 int main(int argc, char **argv){
   int K,M,N,D,nlp,nlpr[3]={0,0,0},size[3],flag=0,verb,optc;
   double **W,**T,**G,**P,***C,***U,***V,*A,*B,**X,**Y,**Z,*S0,*S1,*S2;
   double dz,sgmX,sgmY,muX[3],muY[3],asp[3]={1,1,1},iasp[3]={1,1,1};
-  char mode,opt,**optp,*fout,ftxt[32]="T.txt",fbin[32]="T.bin",fprm[32]="";
+  char mode,opt,**optp,*files[4],*fout,ftxt[32]="T.txt",fbin[32]="T.bin",fprm[32]="";
   double prms[6]={1000,0.1,1.0,1.0,0,1.0};/*default: nloop,omega,lambda,beta,rank,zscale*/
 
   if      (argc==2) printVersion();
@@ -146,34 +113,8 @@ int main(int argc, char **argv){
   if(D< 2&&D> 3){printf("Error: Dimension must be 2 or 3.             \n");exit(EXIT_FAILURE);}
   if(N<=D||M<=D){printf("Error: #points must be greater than dimension\n");exit(EXIT_FAILURE);}
   size[0]=M;size[1]=N;size[2]=D;nlp=prms[0];K=prms[4];dz=prms[5];
-  fout=(mode=='t')?ftxt:fbin;
-
-  if(verb){
-    printf("\n");
-    printf("  Input Data:\n");
-    printf("    Point set 1 (reference): [%s]\n", argv[2]);
-    printf("    Point set 2 (floating):  [%s]\n", argv[3]);
-    printf("    Size of point set 1: [%3d,%2d]\n", M,D);
-    printf("    Size of point set 2: [%3d,%2d]\n", N,D); printf("\n");
-    printf("  Deformation Model:\n    [");
-    if(flag&1) printf("rigid" ); if(flag&1&&(flag&2||flag&4)) printf("+");
-    if(flag&2) printf("affine"); if(flag&2&&(flag&4))         printf("+");
-    if(flag&4) printf("cpd"   ); printf("]\n\n");
-    printf("  Parameters: ");if(strlen(fprm))printf("%s",fprm); printf("\n");
-    printf("    nloop  = %d\n", (int) prms[0]);
-    printf("    omega  = %lf\n",      prms[1]);
-    printf("    lambda = %lf\n",      prms[2]);
-    printf("    beta   = %lf\n",      prms[3]);
-    if(K)    printf("    rank   = %d\n", (int) prms[4]);
-    if(D==3) printf("    zscale = %lf\n",prms[5]);
-    if(strlen(fprm)){printf("\n");
-      printf("  ** Parameters specified by %s were used, that is,\n", fprm);
-      printf("  those specified by command-line arguments are disabled.\n");
-    }
-    printf("\n");
-    printf("  Output: \n");
-    printf("    [%s]\n\n",fout);
-  }
+  files[0]=argv[2];files[1]=argv[3];files[2]=fprm;files[3]=fout=(mode=='t')?ftxt:fbin;
+  if(verb) printInfo((const char**)files,size,prms,flag);
 
   W = calloc2d(M,  D  ); A = calloc  (M*M,sizeof(double));
   T = calloc2d(M,  D  ); B = calloc  (M*M,sizeof(double));
