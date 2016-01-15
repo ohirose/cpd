@@ -67,12 +67,12 @@ void readPrms(double prms[6],const char *file){
 
 int checkPrms(double prms[6]){ int nlp,K; double omg,lmd,bet,dz;
   nlp=prms[0];omg=prms[1];lmd=prms[2];bet=prms[3];K=prms[4];dz=prms[5];
-  if(!(nlp>0))       {printf("-n: Argument must be a positive integer. Abort.\n");        exit(EXIT_FAILURE);}
-  if(!(omg>0&&omg<1)){printf("-w: Argument must range (0,1). Abort.\n");                  exit(EXIT_FAILURE);}
-  if(!(lmd>0))       {printf("-l: Argument must be positive. Abort.\n");                  exit(EXIT_FAILURE);}
-  if(!(bet>0))       {printf("-b: Argument must be positive. Abort.\n");                  exit(EXIT_FAILURE);}
-  if(!(dz >0))       {printf("-z: Argument must be positive. Abort.\n");                  exit(EXIT_FAILURE);}
-  if(!(K >=0))       {printf("-r: Argument must be a positive integer or zero. Abort.\n");exit(EXIT_FAILURE);}
+  if(!(nlp>0))       {printf("-n: Error: Argument must be a positive integer. Abort.\n"); exit(EXIT_FAILURE);}
+  if(!(omg>0&&omg<1)){printf("-w: Error: Argument must be in range (0,1). Abort.\n");     exit(EXIT_FAILURE);}
+  if(!(lmd>0))       {printf("-l: Error: Argument must be positive. Abort.\n");           exit(EXIT_FAILURE);}
+  if(!(bet>0))       {printf("-b: Error: Argument must be positive. Abort.\n");           exit(EXIT_FAILURE);}
+  if(!(dz >0))       {printf("-z: Error: Argument must be positive. Abort.\n");           exit(EXIT_FAILURE);}
+  if(!(K >=0))       {printf("-r: Error: Argument must be a positive integer. Abort.\n"); exit(EXIT_FAILURE);}
   return 0;
 }
 
@@ -95,7 +95,7 @@ void printUsage(void){
   printf("  OPTIONs: Options must be added AFTER the arguments. If the parameter file is set   \n");
   printf("  as the argument of '-p', other parameters specified by options are ignored.        \n");
   printf("  -n: nloop, -w omega, -l lambda, -b beta, -r rank, -z zscale, -p <parameter file>.\n\n");
-  printf("  EXAMPLE: ./cpd rac X.txt Y.txt -w 0.5 -l 2.0 -b 0.9 -z 3.5 -n 2000                \n\n");
+  printf("  EXAMPLE: ./cpd rac X.txt Y.txt -w 0.5 -l 2.0 -b 0.9 -z 3.5 -n 2000 -r 20         \n\n");
   exit(EXIT_SUCCESS); return;
 }
 
@@ -143,6 +143,8 @@ int main(int argc, char **argv){
 
   X=read2d(&N,&D,&mode,argv[2]);
   Y=read2d(&M,&D,&mode,argv[3]);
+  if(D< 2&&D> 3){printf("Error: Dimension must be 2 or 3.             \n");exit(EXIT_FAILURE);}
+  if(N<=D||M<=D){printf("Error: #points must be greater than dimension\n");exit(EXIT_FAILURE);}
   size[0]=M;size[1]=N;size[2]=D;nlp=prms[0];K=prms[4];dz=prms[5];
   fout=(mode=='t')?ftxt:fbin;
 
