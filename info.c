@@ -9,11 +9,12 @@ void printUsage(void){
   printf("  MODE: At least one of characters r, a, and c must be included in <mode>.             \n");
   printf("  Optionally, m and q which specify print options can be attatched.                    \n");
   printf("  r: rigid, a: affine, c: cpd, q: quiet, m: memorize optimization process.           \n\n");
+  printf("  X: point set 1, reference points.                                                    \n");
+  printf("  Y: point set 2, floating points.                                                   \n\n");
   printf("  OPTIONs: Options must be added AFTER the arguments. If the parameter file is set     \n");
   printf("  as the argument of '-p', other parameters specified by options are ignored.          \n");
   printf("  -n: nloop, -w omega, -l lambda, -b beta, -r rank, -z zscale, -p <parameter file>.  \n\n");
   printf("  EXAMPLE: ./cpd rac X.txt Y.txt -w 0.5 -l 2.0 -b 0.9 -z 3.5 -n 2000 -r 20           \n\n");
-  exit(EXIT_SUCCESS); return;
 }
 
 void printVersion(void){
@@ -24,7 +25,6 @@ void printVersion(void){
   printf(" Coherent Point Drift (CPD) invented by Andriy Myronenko and Xubo Song (2010).         \n");
   printf(" Algorithm details are available in their article \"Point Set Registration: Coherent   \n");
   printf(" Point Drift, IEEE TPAMI, 32(12), 2262--2275, 2010.                                  \n\n");
-  exit(EXIT_SUCCESS); return;
 }
 
 void printInfo(const char **files, const int size[3], const double prms[6], const int flag){

@@ -84,8 +84,8 @@ int main(int argc, char **argv){
   char mode,opt,**optp,*files[4],*fout,ftxt[32]="T.txt",fbin[32]="T.bin",fprm[32]="";
   double prms[6]={1000,0.1,1.0,1.0,0,1.0};/*default: nloop,omega,lambda,beta,rank,zscale*/
 
-  if      (argc==2) printVersion();
-  else if (argc <4) printUsage  ();
+  if      (argc==2){printVersion(); exit(EXIT_SUCCESS);}
+  else if (argc <4){printUsage  (); exit(EXIT_SUCCESS);}
 
   flag+=strchr(argv[1],(int)'r')!=NULL?1:0;
   flag+=strchr(argv[1],(int)'a')!=NULL?2:0;
