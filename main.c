@@ -66,19 +66,19 @@ void readPrms(double prms[6],const char *file){
   return;
 }
 
-int checkPrms(double prms[6]){ int nlp,K; double omg,lmd,bet,dz;
-  nlp=prms[0];omg=prms[1];lmd=prms[2];bet=prms[3];K=prms[4];dz=prms[5];
+int checkPrms(double prms[6]){ int nlp,rank; double omg,lmd,bet,dz;
+  nlp=prms[0];omg=prms[1];lmd=prms[2];bet=prms[3];rank=prms[4];dz=prms[5];
   if(!(nlp>0))       {printf("-n: Error: Argument must be a positive integer. Abort.\n"); exit(EXIT_FAILURE);}
   if(!(omg>0&&omg<1)){printf("-w: Error: Argument must be in range (0,1). Abort.\n");     exit(EXIT_FAILURE);}
   if(!(lmd>0))       {printf("-l: Error: Argument must be positive. Abort.\n");           exit(EXIT_FAILURE);}
   if(!(bet>0))       {printf("-b: Error: Argument must be positive. Abort.\n");           exit(EXIT_FAILURE);}
   if(!(dz >0))       {printf("-z: Error: Argument must be positive. Abort.\n");           exit(EXIT_FAILURE);}
-  if(!(K >=0))       {printf("-r: Error: Argument must be a positive integer. Abort.\n"); exit(EXIT_FAILURE);}
+  if(!(rank>=0))     {printf("-r: Error: Argument must be a positive integer. Abort.\n"); exit(EXIT_FAILURE);}
   return 0;
 }
 
 int main(int argc, char **argv){
-  int K,M,N,D,nlp,nlpr[3]={0,0,0},size[3],flag=0,verb,optc;
+  int rank,M,N,D,nlp,nlpr[3]={0,0,0},size[3],flag=0,verb,optc,sd=sizeof(double);
   double **W,**T,**G,**P,***C,***U,***V,*A,*B,**X,**Y,**Z,*S0,*S1,*S2;
   double dz,sgmX,sgmY,muX[3],muY[3],asp[3]={1,1,1},iasp[3]={1,1,1};
   char mode,opt,**optp,*files[4],*fout,ftxt[32]="T.txt",fbin[32]="T.bin",fprm[32]="";
@@ -112,19 +112,19 @@ int main(int argc, char **argv){
   Y=read2d(&M,&D,&mode,argv[3]);
   if(D< 2&&D> 3){printf("Error: Dimension must be 2 or 3.             \n");exit(EXIT_FAILURE);}
   if(N<=D||M<=D){printf("Error: #points must be greater than dimension\n");exit(EXIT_FAILURE);}
-  size[0]=M;size[1]=N;size[2]=D;nlp=prms[0];K=prms[4];dz=prms[5];
+  size[0]=M;size[1]=N;size[2]=D;nlp=prms[0];rank=prms[4];dz=prms[5];
   files[0]=argv[2];files[1]=argv[3];files[2]=fprm;files[3]=fout=(mode=='t')?ftxt:fbin;
   if(verb) printInfo((const char**)files,size,prms,flag);
 
-  W = calloc2d(M,  D  ); A = calloc  (M*M,sizeof(double));
-  T = calloc2d(M,  D  ); B = calloc  (M*M,sizeof(double));
-  G = calloc2d(M,  M  ); C = calloc3d(4,N>M?N:M,D);
-  U = calloc3d(2,K+1,M); V = calloc3d(2,M,D);
-  P = calloc2d(M+1,N+1);
+  W = calloc2d(M,D);        A = calloc  (M*M,sd);
+  T = calloc2d(M,D);        B = calloc  (M*M,sd);
+  G = calloc2d(M,M);        C = calloc3d(4,N>M?N:M,D);
+  U = calloc3d(2,rank+1,M); P = calloc2d(M+1,N+1);
+  V = calloc3d(2,M,D);
 
-  S0=flag&1?malloc(nlp*M*D*sizeof(double)):NULL;
-  S1=flag&2?malloc(nlp*M*D*sizeof(double)):NULL;
-  S2=flag&4?malloc(nlp*M*D*sizeof(double)):NULL;
+  S0=flag&1?malloc(nlp*M*D*sd):NULL;
+  S1=flag&2?malloc(nlp*M*D*sd):NULL;
+  S2=flag&4?malloc(nlp*M*D*sd):NULL;
 
   #define CD  (const double **)
   #define CD1 (const double * )
