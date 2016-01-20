@@ -74,7 +74,7 @@ int affine(double       **  W,        /*  D+1 x  D          | Linear map        
     for(d=0;d<D;d++)for(i=0;i<D;i++)for(m=0;m<M;m++) A[d+i*D]+=Yc [m][d]*Yc[m][i]*P[m][N];
     for(d=0;d<D;d++)for(i=0;i<D;i++)for(m=0;m<M;m++) B[i+d*D]+=PXc[m][d]*Yc[m][i]; //transpose
 
-    /* solve AW=B compute transformation T */
+    /* solve AW=B and compute transformation T */
     dposv_(&uplo,&D,&D,A,&D,B,&D,&info);
     for(d=0;d<D;d++)for(i=0;i<D;i++) F[d][i]=B[i+d*D]; // transpose
     for(d=0;d<D;d++){a[d]=mX[d];for(i=0;i<D;i++) a[d]-=F[d][i]*mY[i];}

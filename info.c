@@ -24,7 +24,7 @@ void printVersion(void){
   printf(" This software is an implementation of the point-set registration algorithm known as   \n");
   printf(" Coherent Point Drift (CPD) invented by Andriy Myronenko and Xubo Song (2010).         \n");
   printf(" Algorithm details are available in their article \"Point Set Registration: Coherent   \n");
-  printf(" Point Drift, IEEE TPAMI, 32(12), 2262--2275, 2010.                                  \n\n");
+  printf(" Point Drift\", IEEE TPAMI, 32(12), 2262--2275, 2010.                                \n\n");
 }
 
 void printInfo(const char **files, const int size[3], const double prms[6], const int flag){
