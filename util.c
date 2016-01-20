@@ -161,3 +161,15 @@ double ** read2d(int *nr, int *nc, char *mode, const char *file){
          printf("delimited file nor binary file. Abort.  \n");          exit(EXIT_FAILURE);
 }
 
+void conv2d(const char *file){
+  int nr,nc; double **X; char mode,fout[256],*ext;
+
+  X=read2d(&nr,&nc,&mode,file);
+
+  strcpy(fout,file); ext=strrchr(fout,'.');
+  if(mode=='t') strcpy(ext,".bin");
+  if(mode=='b') strcpy(ext,".txt");
+
+  write2d(fout,(const double**)X,nr,nc);
+}
+

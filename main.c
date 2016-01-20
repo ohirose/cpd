@@ -81,7 +81,7 @@ int main(int argc, char **argv){
   int rank,M,N,D,nlp,nlpr[3]={0,0,0},size[3],flag=0,verb,optc,sd=sizeof(double);
   double **W,**T,**G,**P,***C,***U,***V,*A,*B,**X,**Y,**Z,*S0,*S1,*S2;
   double dz,sgmX,sgmY,muX[3],muY[3],asp[3]={1,1,1},iasp[3]={1,1,1};
-  char mode,opt,**optp,*files[4],*fout,ftxt[32]="T.txt",fbin[32]="T.bin",fprm[32]="";
+  char mode,opt,**optp,*files[4],fout[256]="",fprm[256]="",ftxt[32]="T.txt",fbin[32]="T.bin";
   double prms[6]={1000,0.1,1.0,1.0,0,1.0};/*default: nloop,omega,lambda,beta,rank,zscale*/
 
   if      (argc==2){printVersion(); exit(EXIT_SUCCESS);}
@@ -94,7 +94,7 @@ int main(int argc, char **argv){
   verb =strchr(argv[1],(int)'q')!=NULL?0:1;
 
   optp=argv+3; optc=argc-3;
-  while((opt=getopt(optc,optp,"n:w:l:b:r:z:p:v"))!=-1){
+  while((opt=getopt(optc,optp,"n:w:l:b:r:z:p:o:v"))!=-1){
     switch(opt){
       case 'n': prms[0]=atof(optarg);  break;
       case 'w': prms[1]=atof(optarg);  break;
@@ -103,17 +103,26 @@ int main(int argc, char **argv){
       case 'r': prms[4]=atof(optarg);  break;
       case 'z': prms[5]=atof(optarg);  break;
       case 'p': strcpy (fprm,optarg);  break;
+      case 'o': strcpy (fout,optarg);  break;
       case 'v': printVersion();        break;
       default : exit(EXIT_FAILURE);
     }
-  } if(strlen(fprm)) readPrms(prms,fprm); checkPrms(prms);
+  }
 
   X=read2d(&N,&D,&mode,argv[2]);
   Y=read2d(&M,&D,&mode,argv[3]);
+
   if(D< 2&&D> 3){printf("Error: Dimension must be 2 or 3.             \n");exit(EXIT_FAILURE);}
   if(N<=D||M<=D){printf("Error: #points must be greater than dimension\n");exit(EXIT_FAILURE);}
-  size[0]=M;size[1]=N;size[2]=D;nlp=prms[0];rank=prms[4];dz=prms[5];
-  files[0]=argv[2];files[1]=argv[3];files[2]=fprm;files[3]=fout=(mode=='t')?ftxt:fbin;
+
+  if( strlen(fprm)) readPrms(prms,fprm); checkPrms(prms);
+  if(!strlen(fout)) strcpy(fout,(mode=='t')?ftxt:fbin);
+
+  files[0]=argv[2]; size[0]=M; nlp =prms[0];
+  files[1]=argv[3]; size[1]=N; rank=prms[4];
+  files[2]=fprm;    size[2]=D; dz  =prms[5];
+  files[3]=fout;
+
   if(verb) printInfo((const char**)files,size,prms,flag);
 
   W = calloc2d(M,D);        A = calloc  (M*M,sd);

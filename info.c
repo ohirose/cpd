@@ -13,7 +13,8 @@ void printUsage(void){
   printf("  Y: point set 2, floating points.                                                   \n\n");
   printf("  OPTIONs: Options must be added AFTER the arguments. If the parameter file is set     \n");
   printf("  as the argument of '-p', other parameters specified by options are ignored.          \n");
-  printf("  -n nloop, -w omega, -l lambda, -b beta, -r rank, -z zscale, -p <parameter file>.   \n\n");
+  printf("  -n nloop, -w omega, -l lambda, -b beta, -r rank, -z zscale, -p <parameter file>.     \n");
+  printf("  -o <output file>                                                                   \n\n");
   printf("  EXAMPLE: ./cpd rac X.txt Y.txt -w 0.5 -l 2.0 -b 0.9 -z 3.5 -n 2000 -r 20           \n\n");
 }
 
