@@ -6,26 +6,27 @@
 void printUsage(void){
   printf("\n");
   printf("  USAGE: ./cpd <mode> <X> <Y> (+ options) \n\n");
-  printf("  MODE: At least one of characters r, a, and c must be included in <mode>.             \n");
-  printf("  Optionally, m and q which specify print options can be attatched.                    \n");
-  printf("  r: rigid, a: affine, c: cpd, q: quiet, m: memorize optimization process.           \n\n");
-  printf("  X: point set 1, reference points.                                                    \n");
-  printf("  Y: point set 2, floating points.                                                   \n\n");
-  printf("  OPTIONs: Options must be added AFTER the arguments. If the parameter file is set     \n");
-  printf("  as the argument of '-p', other parameters specified by options are ignored.          \n");
-  printf("  -n nloop, -w omega, -l lambda, -b beta, -r rank, -z zscale, -p <parameter file>.     \n");
-  printf("  -o <output file>                                                                   \n\n");
-  printf("  EXAMPLE: ./cpd rac X.txt Y.txt -w 0.5 -l 2.0 -b 0.9 -z 3.5 -n 2000 -r 20           \n\n");
+  printf("  MODE: At least one of characters r, a, and c must be included in <mode>.  \n"  );
+  printf("  Optionally, m and q which specify print options can be attatched.         \n"  );
+  printf("  r: rigid, a: affine, c: cpd, q: quiet, m: memorize optimization process.  \n\n");
+  printf("  X: point set 1, reference points.                                         \n"  );
+  printf("  Y: point set 2, floating points.                                          \n\n");
+  printf("  OPTIONs: Options must be added AFTER the arguments. If the parameter      \n"  );
+  printf("  file is set as the argument of '-p', other parameters specified by        \n"  );
+  printf("  command-line options are ignored.                                         \n"  );
+  printf("  -n nloop, -w omega, -l lambda, -b beta, -r rank, -z zscale,               \n"  );
+  printf("  -p <parameter file>, -o <output file name>.                               \n\n");
+  printf("  EXAMPLE: ./cpd rac X.txt Y.txt -w 0.5 -l 2.0 -b 0.9 -z 3.5 -n 2000 -r 20  \n\n");
 }
 
 void printVersion(void){
   printf("\n");
   printf(" cpd version %s (%s).\n",_VERSION_,_DATE_);
-  printf(" Copyright (c) Osamu Hirose                                                          \n\n");
-  printf(" This software is an implementation of the point-set registration algorithm known as   \n");
-  printf(" Coherent Point Drift (CPD) invented by Andriy Myronenko and Xubo Song (2010).         \n");
-  printf(" Algorithm details are available in their article \"Point Set Registration: Coherent   \n");
-  printf(" Point Drift\", IEEE TPAMI, 32(12), 2262--2275, 2010.                                \n\n");
+  printf(" Copyright (c) Osamu Hirose                                                 \n\n");
+  printf(" This software is an implementation of the point-set registration algorithm \n"  );
+  printf(" known as Coherent Point Drift (CPD) invented by Andriy Myronenko and Xubo  \n"  );
+  printf(" Song (2010). Algorithm details are available in their article \"Point Set  \n"  );
+  printf(" Registration: Coherent Point Drift\", IEEE TPAMI, 32(12), 2262--2275, 2010.\n\n");
 }
 
 void printInfo(const char **files, const int size[3], const double prms[6], const int flag){

@@ -1,3 +1,3 @@
-#define _VERSION_  "0.1.6"
+#define _VERSION_  "0.1.7"
 #define _DATE_     "21/Jan/2016"
 
