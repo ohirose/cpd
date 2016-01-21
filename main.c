@@ -131,9 +131,9 @@ int main(int argc, char **argv){
   U = calloc3d(2,rank+1,M); P = calloc2d(M+1,N+1);
   V = calloc3d(2,M,D);
 
-  S0=flag&1?malloc(nlp*M*D*sd):NULL;
-  S1=flag&2?malloc(nlp*M*D*sd):NULL;
-  S2=flag&4?malloc(nlp*M*D*sd):NULL;
+  S0=(flag&1 && flag&8)?malloc(nlp*M*D*sd):NULL;
+  S1=(flag&2 && flag&8)?malloc(nlp*M*D*sd):NULL;
+  S2=(flag&4 && flag&8)?malloc(nlp*M*D*sd):NULL;
 
   #define CD  (const double **)
   #define CD1 (const double * )
