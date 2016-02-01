@@ -58,7 +58,7 @@ void readPrms(double prms[6],const char *file){
 
   fp=fopen(file,"r");if(!fp){printf("File not found: %s\n",file);exit(EXIT_FAILURE);}
   while(fgets(line,1024,fp)){
-    if(line[0]=='#') continue; L=strlen(line);
+    if(strchr("#|+",line[0])) continue; L=strlen(line);
     for(l=0;l<L;l++) line[l]=tolower(line[l]);
     for(i=0;i<N;i++){s=names[i];if(strstr(line,s))sscanf(line+strlen(s),"%lf\n",&prms[i]);}
   } fclose(fp);
@@ -141,7 +141,7 @@ int main(int argc, char **argv){
   scalePoints(X,N,D,asp); normPoints(X,muX,&sgmX,N,D);
   scalePoints(Y,M,D,asp); normPoints(Y,muY,&sgmY,M,D);
 
-  if(flag&1) {nlpr[0]=rot   (W,T,P,C,S0,CD X,CD Y,size,prms,verb); if(flag&6){Z=Y;Y=T;T=Z;}}
+  if(flag&1) {nlpr[0]=rigid (W,T,P,C,S0,CD X,CD Y,size,prms,verb); if(flag&6){Z=Y;Y=T;T=Z;}}
   if(flag&2) {nlpr[1]=affine(W,T,P,C,S1,CD X,CD Y,size,prms,verb); if(flag&4){Z=Y;Y=T;T=Z;}}
   if(flag&4) {nlpr[2]=cpd   (W,T,P,G,U,V,A,B,S2,CD X,CD Y,size,prms,verb);}
 

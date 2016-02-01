@@ -22,7 +22,7 @@
 #include<assert.h>
 #include<math.h>
 #include"util.h"
-#include"lpk.h"
+#include"lapack.h"
 #include"info.h"
 
 int cpd(double       **  W,        /*  M   x   D     | Displacement matrix      */

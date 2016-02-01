@@ -22,7 +22,7 @@
 #include<assert.h>
 #include<math.h>
 #include"util.h"
-#include"lpk.h"
+#include"lapack.h"
 #include"info.h"
 #define WSIZE 100
 
@@ -34,16 +34,16 @@ double det(const double *A, const int D){
               +A[0+D*2]*(A[1+D*0]*A[2+D*1]-A[1+D*1]*A[2+D*0]);
 }
 
-int rot(double       **  W,        /*  D+1 x  D          | Linear map            */
-        double       **  T,        /*  M   x  D          | Moved points          */
-        double       **  P,        /*  M+1 x  N+1        | Matching probablity   */
-        double       *** C,        /*  4 x max(M,N) x D  | Working memory        */
-        double       *   S,        /*  nlp x M x D       | Working wemory (3D)   */
-        const double **  X,        /*  N   x  D          | Point set 1 (Data)    */
-        const double **  Y,        /*  M   x  D          | Point set 2 (Data)    */
-        const int        size[3],  /*  M,  N, D          | D must be 2 or 3      */
-        const double     prms[2],  /*  parameters: nloop, omg                    */
-        const int        verb      /*  flag: verbose                             */
+int rigid(double       **  W,        /*  D+1 x  D          | Linear map            */
+          double       **  T,        /*  M   x  D          | Moved points          */
+          double       **  P,        /*  M+1 x  N+1        | Matching probablity   */
+          double       *** C,        /*  4 x max(M,N) x D  | Working memory        */
+          double       *   S,        /*  nlp x M x D       | Working wemory (3D)   */
+          const double **  X,        /*  N   x  D          | Point set 1 (Data)    */
+          const double **  Y,        /*  M   x  D          | Point set 2 (Data)    */
+          const int        size[3],  /*  M,  N, D          | D must be 2 or 3      */
+          const double     prms[2],  /*  parameters: nloop, omg                    */
+          const int        verb      /*  flag: verbose                             */
        ){
   int i,j,m,n,d,M,N,D,lp,ws,wi[WSIZE]; int info; char jobz='A';
   int nlp=(int)prms[0]; double omg=prms[1],reg=1e-9;

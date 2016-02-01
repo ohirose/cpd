@@ -22,7 +22,7 @@
 #include<assert.h>
 #include<math.h>
 #include"util.h"
-#include"lpk.h"
+#include"lapack.h"
 #include"info.h"
 
 int affine(double       **  W,        /*  D+1 x  D          | Linear map            */

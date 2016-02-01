@@ -1,4 +1,4 @@
-int rot   (double       **  W,        /*  D+1 x  D          | Linear map            */
+int rigid (double       **  W,        /*  D+1 x  D          | Linear map            */
            double       **  T,        /*  M   x  D          | Moved points          */
            double       **  P,        /*  M+1 x  N+1        | Matching probablity   */
            double       *** C,        /*  4 x max(M,N) x D  | Working memory        */
