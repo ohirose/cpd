@@ -1,10 +1,11 @@
 
 # Coherent Point Drift
-This software is a simple implementation of the point-set registration algorithm known as Coherent   
-Point Drift (CPD) invented by Andriy Myronenko and Xubo Song (2010). All of the source codes were    
-written by ohirose in C language except for functions for solving linear equations, singular value   
-decomposition, and eigendecomposition. Algorithm details are available in their article "Point Set  
-Registration: Coherent Point Drift, IEEE TPAMI, 32(12), 2262--2275, 2010.    
+This software is a simple implementation of the point-set registration algorithm known as
+[Coherent Point Drift](https://en.wikipedia.org/wiki/Point_set_registration#Coherent_point_drift)   
+(CPD) invented by Andriy Myronenko and Xubo Song (2010). All of the source codes were written by   
+ohirose in C language except for functions for solving linear equations, singular value decomposition,  
+and eigendecomposition. Algorithm details are available in their article "Point Set Registration:   
+Coherent Point Drift, IEEE TPAMI, 32(12), 2262--2275, 2010.    
 
 ## INSTALL
 **Linux**: Launch terminal, move to the source file directory, and type `make`.   
@@ -43,6 +44,6 @@ Registration: Coherent Point Drift, IEEE TPAMI, 32(12), 2262--2275, 2010.
   If the option `-v` with no argument is specified, the version information is printed.
 
   **EXAMPLE**:   
-  `./cpd raci X.txt Y.txt -w 0.5 -l 1.5 -b 0.9 -z 3.5 -n 2000`                       
+  `./cpd rac X.txt Y.txt -w 0.5 -l 1.5 -b 0.9 -z 3.5 -n 2000`
 
 

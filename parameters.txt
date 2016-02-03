@@ -12,7 +12,7 @@ rank	20
 |  For each line, a parameter and the corresponding value MUST be    |
 |  separated by white spaces (other separaters such as ',' and ":"   |
 |  are not allowed). If the first character is one of the "#", "+",  |
-|  and "-", the corresponding sentence is skipped.                   |
+|  and "|", the corresponding sentence is skipped.                   |
 |                                                                    |
 |  If the option '-p' is active, parameters specified by the other   |
 |  options are disabled and default values are used for parameters   |
