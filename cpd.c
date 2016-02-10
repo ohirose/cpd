@@ -45,7 +45,7 @@ int cpd(double       **  W,        /*  M   x   D     | Displacement matrix      
   double omg,lmd,bet2,reg=1e-9; double **Q,**C0,**C1,**PX,*L,*Lr;
   double sgm2=0,noise,val,pres1=1e10,pres2=1e20,conv;
 
-  nlp=(int)prms[0];omg=prms[1];bet2=SQ(prms[2]);lmd=prms[3];K=prms[4];
+  nlp=(int)prms[0];omg=prms[1];lmd=prms[2];bet2=SQ(prms[3]);K=prms[4];
   M=size[0];N=size[1];D=size[2];Q=U[0];C0=U[1];PX=V[0];C1=V[1];L=U[0][K];Lr=U[1][K];lwork=M*M;
 
   /* initialization */
