@@ -70,12 +70,12 @@ int affine(double       **  W,        /*  D+1 x  D          | Linear map        
 
     /* compute A=Yc'*diag(P1)*Yc and B=Xc'*P'*Yc  */
     for(m=0;m<M;m++)for(d=0;d<D;d++){PXc[m][d]=0;for(n=0;n<N;n++) PXc[m][d]+=P[m][n]*Xc[n][d];}
-    for(d=0;d<D;d++)for(i=0;i<D;i++) A[d+i*D]=B[d+i*D]=0;
+    for(d=0;d<D;d++)for(i=0;i<D;i++) A[d+i*D]=B[d+i*D]=d==i?reg:0;
     for(d=0;d<D;d++)for(i=0;i<D;i++)for(m=0;m<M;m++) A[d+i*D]+=Yc [m][d]*Yc[m][i]*P[m][N];
     for(d=0;d<D;d++)for(i=0;i<D;i++)for(m=0;m<M;m++) B[i+d*D]+=PXc[m][d]*Yc[m][i]; //transpose
 
     /* solve AW=B and compute transformation T */
-    dposv_(&uplo,&D,&D,A,&D,B,&D,&info);
+    dposv_(&uplo,&D,&D,A,&D,B,&D,&info); assert(!info);
     for(d=0;d<D;d++)for(i=0;i<D;i++) F[d][i]=B[i+d*D]; // transpose
     for(d=0;d<D;d++){a[d]=mX[d];for(i=0;i<D;i++) a[d]-=F[d][i]*mY[i];}
     for(m=0;m<M;m++)for(d=0;d<D;d++){T[m][d]=a[d];for(i=0;i<D;i++)T[m][d]+=Y[m][i]*F[d][i];}
@@ -83,7 +83,7 @@ int affine(double       **  W,        /*  D+1 x  D          | Linear map        
     /* compute sgm2 (corresponds to residual) */
     pres2=pres1;pres1=sgm2;sgm2=0;
     for(m=0;m<M;m++)for(d=0;d<D;d++){C1[m][d]=0;for(i=0;i<D;i++) C1[m][d]+=Yc[m][i]*F[d][i];}
-    for(n=0;n<N;n++)for(d=0;d<D;d++) sgm2+=SQ(X[n][d])*P[M][n];
+    for(n=0;n<N;n++)for(d=0;d<D;d++) sgm2+=SQ(Xc[n][d])*P[M][n];
     for(m=0;m<M;m++)for(d=0;d<D;d++) sgm2-=PXc [m][d]*C1[m][d];
     sgm2/=P[M][N]*D;
 

@@ -140,6 +140,8 @@ int main(int argc, char **argv){
   if(D==3) {asp[2]=dz;iasp[2]=1.0/dz;}
   scalePoints(X,N,D,asp); normPoints(X,muX,&sgmX,N,D);
   scalePoints(Y,M,D,asp); normPoints(Y,muY,&sgmY,M,D);
+  if(S0||S1||S2) write2d("normX.txt",CD X,N,D);
+  if(S0||S1||S2) write2d("normY.txt",CD Y,M,D);
 
   if(flag&1) {nlpr[0]=rigid (W,T,P,C,S0,CD X,CD Y,size,prms,verb); if(flag&6){Z=Y;Y=T;T=Z;}}
   if(flag&2) {nlpr[1]=affine(W,T,P,C,S1,CD X,CD Y,size,prms,verb); if(flag&4){Z=Y;Y=T;T=Z;}}

@@ -99,7 +99,7 @@ int rigid(double       **  W,        /*  D+1 x  D          | Linear map         
 
     /* compute sgm2 (corresponds to residual) */
     pres2=pres1;pres1=sgm2;sgm2=-s*c1;
-    for(n=0;n<N;n++)for(d=0;d<D;d++) sgm2+=SQ(X[n][d])*P[M][n]; sgm2/=P[M][N]*D;
+    for(n=0;n<N;n++)for(d=0;d<D;d++) sgm2+=SQ(Xc[n][d])*P[M][n]; sgm2/=P[M][N]*D;
 
     /* check convergence */
     conv=log(pres2)-log(sgm2 );

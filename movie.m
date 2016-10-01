@@ -1,6 +1,5 @@
-load X1.txt;
-load Y1.txt;
-load T1.txt;
+load normX.txt; X=normX;
+load T.txt;
 
 clf;
 nf=40;
@@ -11,8 +10,8 @@ T =reshape(fread(fp,L*M*D,'double'),sz);
 fclose(fp);
 
 for l=1:nf
-  plot(X1(:,1),  X1(:,2),  'bo','MarkerSize',8); hold on;
-  plot(T (:,1,l),T (:,2,l),'ro','MarkerSize',5,'MarkerFaceColor',[1,0,0]);
+  plot(X(:,1),  X(:,2),  'bo','MarkerSize',8); hold on;
+  plot(T(:,1,l),T(:,2,l),'ro','MarkerSize',5,'MarkerFaceColor',[1,0,0]);
   axis([-2.5,2.5,-2.5,2.5]);
   fn=sprintf('otw-%04d.png',l);
   print(fn,'-dpng');
