@@ -38,8 +38,8 @@ void printInfo(const char **files, const int size[3], const double prms[6], cons
     printf("  Input Data:\n");
     printf("    Point set 1 (reference): [%s]\n", fX);
     printf("    Point set 2 (floating):  [%s]\n", fY);
-    printf("    Size of point set 1: [%3d,%2d]\n", M,D);
-    printf("    Size of point set 2: [%3d,%2d]\n", N,D); printf("\n");
+    printf("    Size of point set 1: [%3d,%2d]\n", N,D);
+    printf("    Size of point set 2: [%3d,%2d]\n", M,D); printf("\n");
     printf("  Deformation Model:\n    [");
     if(flag&1) printf("rigid" ); if(flag&1&&(flag&2||flag&4)) printf("+");
     if(flag&2) printf("affine"); if(flag&2&&(flag&4))         printf("+");
